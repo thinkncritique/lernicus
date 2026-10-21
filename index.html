@@ -3,526 +3,255 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Darf x rein?</title>
+<title>Lernicus · Schatzkarte</title>
 <link rel="icon" href="logo.png">
-<meta name="description" content="Lernicus: Das Lernspiel zum Definitionsbereich. Entscheide als Türsteher, welche Zahlen in die Funktion dürfen.">
+<meta name="description" content="Lernicus: Der Lernpfad zur Kurvendiskussion als Schatzkarte – Definitionsbereich, Achsenschnittpunkte und Symmetrie spielerisch verstehen.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="lernicus.css">
 <style>
-/* Layout: oben das Türschild mit der Funktion, darunter die Szene (links Straße mit Warteschlange, Mitte Tür mit dem Studenten als Türsteher, rechts die Zahlen-Party), darunter Karte, Frage und Entscheidung. */
-:root {
-  --bg: #edf0f4;
-  --surface: #ffffff;
-  --ink: #14202e;
-  --muted: #566475;
-  --line: #c9d1db;
-  --accent: #2a4bd4;
-  --accent-ink: #ffffff;
-  --plaque: #14202e;
-  --plaque-ink: #f2f5f9;
-  --yes: #1d7a54;
-  --yes-bg: #dcf0e6;
-  --no: #b3322a;
-  --no-bg: #f8dfdc;
-  --hint-bg: #e6ebfb;
-  --sky-top: #8fb6e6; --sky-bot: #f6dcc0;
-  --house: #9aa8bd; --house2: #b6c1d1; --win: #d7e6f5;
-  --tree: #58935f; --pave: #c9ced4; --curb: #e5e8ec;
-  --wall: #3b4062; --trim: #262a44; --pole: #3b4062; --lamp: #ffe9a8; --lampop: .15;
-  --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1520; --surface: #172230; --ink: #e8edf3; --muted: #94a2b2; --line: #2b3a4b;
-    --accent: #8fa8ff; --accent-ink: #0e1520; --plaque: #05090f; --plaque-ink: #eef2f7;
-    --yes: #5bd19a; --yes-bg: #143a2b; --no: #ff8f85; --no-bg: #3e1d1b; --hint-bg: #1f2c4d;
-    --sky-top: #0b1430; --sky-bot: #2b3a66; --house: #1c2844; --house2: #253254; --win: #f3cf6a;
-    --tree: #1f4a35; --pave: #2a3142; --curb: #3a4456; --wall: #2a2e4d; --trim: #1a1d33; --pole: #5a6590; --lampop: .9;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0e1520; --surface: #172230; --ink: #e8edf3; --muted: #94a2b2; --line: #2b3a4b;
-  --accent: #8fa8ff; --accent-ink: #0e1520; --plaque: #05090f; --plaque-ink: #eef2f7;
-  --yes: #5bd19a; --yes-bg: #143a2b; --no: #ff8f85; --no-bg: #3e1d1b; --hint-bg: #1f2c4d;
-  --sky-top: #0b1430; --sky-bot: #2b3a66; --house: #1c2844; --house2: #253254; --win: #f3cf6a;
-  --tree: #1f4a35; --pave: #2a3142; --curb: #3a4456; --wall: #2a2e4d; --trim: #1a1d33; --pole: #5a6590; --lampop: .9;
-  color-scheme: dark;
-}
-* { box-sizing: border-box; }
-body { margin: 0; }
-[hidden] { display: none !important; }
-body {
-  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
-  padding-block: 20px 40px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-button { font: inherit; color: inherit; cursor: pointer; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+/* Layout: Kopfzeile mit Logo; darunter entweder die Schatzkarte (Lernpfad) oder eine geöffnete Station. */
+.wrap.app { max-width: 680px; }
+.pathhead h1 { margin-top: 0; }
+.overall { display: flex; align-items: center; gap: 12px; }
+.bar { flex: 1; height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--yes); border-radius: 99px; transition: width .6s ease; }
+.overall span { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.head-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.logo { flex: none; display: block; line-height: 0; }
-.logo img { display: block; height: 72px; width: auto; }
-@media (max-width: 420px) { .logo img { height: 56px; } }
-/* Im Dark Mode wird das dunkelblaue Logo hell eingefärbt, damit es sichtbar bleibt. */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo img { filter: brightness(0) invert(.92); } }
-:root[data-theme="dark"] .logo img { filter: brightness(0) invert(.92); }
-.brand { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: .02em; color: var(--accent); }
-.score { font-family: var(--font-mono); font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.score b { color: var(--ink); }
-h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 8vw, 2.8rem); line-height: 1.05; margin: 4px 0 0; text-wrap: balance; }
-.sub { color: var(--muted); margin: 6px 0 0; max-width: 52ch; }
+/* Schatzkarte */
+.tmap { position: relative; aspect-ratio: 400 / 540; border-radius: 14px; overflow: hidden; border: 2px solid var(--parch-line); background: var(--parch); box-shadow: inset 0 0 60px rgba(120, 80, 20, .18); }
+.tmap > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tm-sea { fill: var(--sea); }
+.tm-land { fill: var(--parch); stroke: var(--parch-line); stroke-width: 2; }
+.tm-wave { fill: none; stroke: var(--parch-line); stroke-width: 1.5; stroke-linecap: round; opacity: .8; }
+.tm-deco { fill: none; stroke: var(--parch-line); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.tm-text { fill: var(--parch-ink); font: 600 11px var(--font-body); letter-spacing: .18em; text-transform: uppercase; opacity: .75; }
+.tm-seg { fill: none; stroke-width: 5; stroke-linecap: round; }
+.tm-seg.todo { stroke: var(--parch-line); stroke-dasharray: 2 11; }
+.tm-seg.done { stroke: var(--trail); stroke-dasharray: 14 9; }
+.tm-x { stroke: var(--trail); stroke-width: 6; stroke-linecap: round; }
+.tm-x.todo { stroke: var(--parch-line); }
 
-.levels { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0; }
-.levels li { font-size: .8rem; padding: 4px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); display: inline-flex; gap: 6px; }
-.levels li.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.levels li.done { border-color: var(--yes); color: var(--yes); }
-.levels li.soon { border-style: dashed; opacity: .65; }
+.node { position: absolute; transform: translate(-50%, -50%); width: 17%; aspect-ratio: 1; min-width: 60px; border-radius: 50%; display: grid; place-items: center;
+  font-size: clamp(1.7rem, 6vw, 2.3rem); border: 4px solid; background: var(--surface); padding: 0; z-index: 2; }
+.node .badge { position: absolute; right: -6px; top: -6px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: .85rem; font-weight: 800; border: 2px solid var(--parch); }
+.node.done { border-color: var(--yes); background: var(--yes-bg); }
+.node.done .badge { background: var(--yes); color: #fff; }
+.node.current { border-color: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); animation: pulse 2s ease-out infinite; }
+.node.current .badge { background: var(--accent); color: var(--accent-ink); font-size: .7rem; }
+.node.locked { border-color: var(--parch-line); border-style: dashed; background: var(--locked); cursor: not-allowed; }
+.node.locked .emo { filter: grayscale(1); opacity: .45; }
+.node.locked .badge { background: var(--parch2); font-size: .8rem; }
+.node:not(.locked):hover { transform: translate(-50%, -50%) scale(1.06); }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent); } 80%, 100% { box-shadow: 0 0 0 18px transparent; } }
 
-.plaque { background: var(--plaque); color: var(--plaque-ink); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
-.plaque small { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
-.formula { font-family: var(--font-mono); font-weight: 600; font-size: clamp(1.4rem, 6vw, 1.9rem); display: flex; align-items: center; gap: .4em; flex-wrap: wrap; }
-.frac { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.15; vertical-align: middle; }
-.frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 .3em .05em; }
-.frac > span:last-child { padding: .05em .3em 0; }
+.nlabel { position: absolute; width: 44%; background: var(--surface); border: 1px solid var(--parch-line); border-radius: 10px; padding: 8px 10px; z-index: 1; box-shadow: 0 2px 0 var(--parch-line); }
+.nlabel small { display: block; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.nlabel b { display: block; font-family: var(--font-display); font-size: clamp(.95rem, 3.6vw, 1.15rem); line-height: 1.15; }
+.nlabel .st { display: inline-block; margin-top: 4px; font-size: .75rem; font-weight: 600; padding: 1px 8px; border-radius: 99px; }
+.nlabel.done .st { background: var(--yes-bg); color: var(--yes); }
+.nlabel.current .st { background: var(--hint-bg); color: var(--accent); }
+.nlabel.locked { opacity: .8; }
+.nlabel.locked .st { background: var(--locked); color: var(--muted); }
+.goalchest { position: absolute; transform: translate(-50%, -50%); z-index: 1; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: .95rem; z-index: 99; max-width: calc(100% - 32px); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .82rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 50%; border: 3px solid; display: inline-block; }
+.legend .l1 { border-color: var(--yes); background: var(--yes-bg); }
+.legend .l2 { border-color: var(--accent); }
+.legend .l3 { border-color: var(--parch-line); border-style: dashed; background: var(--locked); }
+.finale { display: flex; gap: 14px; align-items: center; }
 
-/* Szene */
-.scene { position: relative; container-type: inline-size; aspect-ratio: 560 / 300; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--sky-top); }
-.scene svg { width: 100%; height: 100%; display: block; }
-.s-house { fill: var(--house); } .s-house2 { fill: var(--house2); } .s-win { fill: var(--win); }
-.s-tree { fill: var(--tree); } .s-trunk { fill: #6b4f3a; } .s-pole { fill: var(--pole); } .s-bench { fill: #8a6a4a; }
-.s-pave { fill: var(--pave); } .s-curb { fill: var(--curb); }
-.s-wall { fill: var(--wall); } .s-trim { fill: var(--trim); }
-.s-inter { fill: #2a1647; } .s-fa { fill: #4c2b7e; } .s-fb { fill: #37205e; } .s-spk { fill: #150c24; }
-.s-ball { fill: #d5dcec; } .s-sign { fill: #12091f; }
-.s-neon { filter: drop-shadow(0 0 3px #ff5fa2); }
-.beam { animation: beam 2.4s ease-in-out infinite alternate; }
-.beam.b2 { animation-delay: .8s; } .beam.b3 { animation-delay: 1.6s; }
-@keyframes beam { from { opacity: .12; } to { opacity: .42; } }
-.m-flat, .a-in, .a-out, .a-idle { display: none; }
-.scene[data-mood="idle"] .a-idle, .scene[data-mood="in"] .a-in, .scene[data-mood="out"] .a-out { display: inline; }
-.scene[data-mood="out"] .m-flat { display: inline; }
-.scene[data-mood="out"] .m-smile { display: none; }
-
-.guests { position: absolute; inset: 0; pointer-events: none; }
-.guest {
-  position: absolute; width: 2.5em; height: 2.5em; transform: translateX(-50%);
-  border-radius: 50%; background: hsl(var(--h) 75% 84%); color: #1a2233;
-  border: .08em solid hsl(var(--h) 45% 40%);
-  display: grid; place-items: center; font: 600 3.4cqw/1 var(--font-mono);
-  transition: left .8s ease, bottom .8s ease, font-size .5s ease;
-}
-.guest span { font-size: .62em; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.guest::after { content: ""; position: absolute; left: 30%; bottom: -.5em; width: .4em; height: .5em; background: hsl(var(--h) 45% 32%); border-radius: 0 0 .1em .1em; box-shadow: .9em 0 0 hsl(var(--h) 45% 32%); }
-.guest.pop { animation: pop .5s ease; }
-.guest.wait { font-size: 2.9cqw; }
-.guest.cur { font-size: 4.4cqw; box-shadow: 0 0 0 .14em #ffd24a, 0 0 .9em rgba(255, 210, 74, .6); }
-.guest.in { box-shadow: 0 0 .9em hsl(var(--h) 90% 65% / .85); animation: dance .8s ease-in-out infinite alternate; }
-.guest.out { font-size: 3cqw; filter: saturate(.35) brightness(.92); border-color: var(--no); transform: translateX(-50%) rotate(-8deg); }
-@keyframes dance { from { transform: translateX(-50%) translateY(0) rotate(-6deg); } to { transform: translateX(-50%) translateY(-.45em) rotate(6deg); } }
-@keyframes pop { from { opacity: 0; transform: translateX(-50%) scale(.6); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
-.bubble {
-  position: absolute; left: 41%; bottom: 55%; transform: translateX(-50%); z-index: 200;
-  background: var(--surface); color: var(--ink); border: 2px solid var(--ink); border-radius: .8em;
-  padding: .3em .7em; font: 600 3.5cqw/1.2 var(--font-display); white-space: nowrap;
-}
-.bubble::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -.4em; border: .4em solid transparent; border-top-color: var(--ink); }
-
-.ticket { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.ticket::before, .ticket::after { content: ""; position: absolute; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); }
-.ticket::before { left: -10px; } .ticket::after { right: -10px; }
-.ticket .lbl { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
-.ticket .num { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 13vw, 3.8rem); line-height: 1; font-variant-numeric: tabular-nums; }
-.ticket .stamp { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; border: 3px solid currentColor; border-radius: 6px; padding: 4px 10px; transform: rotate(-6deg); }
-.ticket.ok { border-color: var(--yes); } .ticket.ok .stamp { color: var(--yes); }
-.ticket.no { border-color: var(--no); } .ticket.no .stamp { color: var(--no); }
-.ticket.fly-in { animation: slideIn .45s ease; } .ticket.fly-out { animation: slideOut .45s ease; }
-@keyframes slideIn { from { transform: translateX(-24px); opacity: .4; } to { transform: none; opacity: 1; } }
-@keyframes slideOut { from { transform: translateX(24px); opacity: .4; } to { transform: none; opacity: 1; } }
-
-.q { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; margin: 0; }
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.btn { border: 2px solid var(--ink); background: var(--surface); border-radius: 6px; padding: 14px 12px; font-weight: 600; min-height: 52px; }
-.btn:hover { background: var(--bg); }
-.btn.yes { border-color: var(--yes); color: var(--yes); }
-.btn.no { border-color: var(--no); color: var(--no); }
-.btn.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.btn.go:hover { filter: brightness(1.08); background: var(--accent); }
-.stack { display: grid; gap: 8px; }
-.opt { text-align: left; font-family: var(--font-mono); font-weight: 500; }
-
-.line { display: flex; gap: 2px; padding: 12px 0 0; border-top: 3px solid var(--ink); position: relative; margin-top: 8px; }
-.tick { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 0 0 4px; }
-.tick i { width: 2px; height: 10px; background: var(--ink); margin-top: -15px; }
-.tick span { font-family: var(--font-mono); font-size: .85rem; padding: 6px 0; width: 100%; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); text-align: center; font-variant-numeric: tabular-nums; }
-.tick:hover span { border-color: var(--ink); }
-.tick.mark span { background: var(--no-bg); border-color: var(--no); color: var(--no); font-weight: 600; }
-
-.fb { border-radius: 6px; padding: 12px 14px; border-left: 5px solid var(--accent); background: var(--hint-bg); }
-.fb.ok { border-color: var(--yes); background: var(--yes-bg); }
-.fb.bad { border-color: var(--no); background: var(--no-bg); }
-.fb b { font-family: var(--font-display); }
-.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 8px; }
-.rule h2 { margin: 0; font-family: var(--font-display); font-size: 1.3rem; }
-.rule p { margin: 0; }
-.mono { font-family: var(--font-mono); }
-.fine { color: var(--muted); font-size: .85rem; }
-.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 0; font-size: .85rem; }
-@media (prefers-reduced-motion: reduce) {
-  .ticket.fly-in, .ticket.fly-out, .guest.pop, .guest.in, .beam { animation: none; }
-  .guest { transition: none; }
-}
-@media (max-width: 420px) { .row { grid-template-columns: 1fr; } }
+/* Station */
+.crumbs { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: .9rem; }
+.crumbs a { font-weight: 600; text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.crumbs span { color: var(--muted); }
+.st-head { display: flex; gap: 14px; align-items: center; }
+.st-icon { width: 64px; height: 64px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 2rem; border: 4px solid var(--accent); background: var(--surface); }
+.st-icon.done { border-color: var(--yes); background: var(--yes-bg); }
+.st-head small { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.st-head h1 { font-size: clamp(1.7rem, 7vw, 2.4rem); margin: 0; }
+.goal { margin: 0; padding: 10px 14px; border-radius: 8px; background: var(--hint-bg); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; }
+.card h2 { margin: 0; font-family: var(--font-display); font-size: 1.25rem; }
+.card p, .card ul, .card ol { margin: 0; }
+.card ul, .card ol { padding-left: 1.2em; display: grid; gap: 6px; }
+details.card summary { cursor: pointer; font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; list-style-position: outside; }
+details.card[open] summary { margin-bottom: 4px; }
+.worked { display: grid; gap: 8px; counter-reset: w; }
+.worked > div { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+.worked > div::before { counter-increment: w; content: counter(w); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--bg); font-weight: 700; font-size: .8rem; }
+.eq { font-family: var(--font-mono); font-weight: 500; background: var(--bg); border-radius: 6px; padding: 4px 8px; display: inline-block; }
+.play h2 { margin: 0 0 4px; font-family: var(--font-display); font-size: 1.35rem; }
+.st-done { border: 2px solid var(--yes); background: var(--yes-bg); border-radius: 12px; padding: 18px; display: grid; gap: 10px; }
+.st-done h2 { margin: 0; font-family: var(--font-display); }
+.st-done .row { grid-template-columns: 1fr 1fr; }
+.formula-inline { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
 </style>
-
 </head>
 <body>
-<div class="wrap">
+<div class="wrap app">
   <header>
     <div class="head-left">
       <span class="brand">Lernicus · Kurvendiskussion</span>
-      <span class="score" id="score" aria-live="polite"></span>
+      <span class="score" id="coins" aria-live="polite"></span>
     </div>
-    <a class="logo" href="./" aria-label="Lernicus Startseite"><img src="logo.png" alt="Lernicus Logo" width="360" height="324"></a>
+    <a class="logo" href="#/" aria-label="Zur Schatzkarte"><img src="logo.png" alt="Lernicus Logo" width="360" height="324"></a>
   </header>
-  <div>
-    <h1>Darf x rein?</h1>
-    <p class="sub">Du bist Student und jobbst als Türsteher am x-Club. Links wartet die Straße, rechts feiern die Zahlen. Entscheide, welche Zahlen in die Funktion dürfen. Das ist der Definitionsbereich.</p>
-  </div>
-  <ol class="levels" id="levels"></ol>
-  <div id="plaque"></div>
-  <div class="scene" id="scene" data-mood="idle" role="img" aria-label="Szene: Links die Straße mit der Warteschlange, in der Mitte der Student als Türsteher an der Tür, rechts die Party der Zahlen im Club."></div>
-  <main id="stage" class="wrap" style="gap:14px"></main>
-  <p class="fine">Kein Zeitdruck. Nach einem Hinweis darfst du noch einmal entscheiden. <button class="linkbtn" id="restart" data-a="restart">Neu starten</button></p>
+  <div id="view" class="wrap" style="max-width:none;width:100%"></div>
 </div>
 
+<script src="lernicus-core.js"></script>
+<script src="darf-x-rein.js"></script>
+<script src="station-achsen.js"></script>
+<script src="station-symmetrie.js"></script>
 <script>
 (function () {
-  var KEY = 'lernicus-darf-x-rein';
-  var fmt = function (n) { var r = Math.round(n * 1e6) / 1e6; return String(r).replace('.', ',').replace('-', '−'); };
+  var KEY = 'lernicus-schatzkarte-v1';
+  var view = document.getElementById('view');
   var frac = function (a, b) { return '<span class="frac"><span>' + a + '</span><span>' + b + '</span></span>'; };
 
-  var LEVELS = [
-    { name: 'Alle willkommen',
-      rule: 'Bei Funktionen wie x² + 3 oder 2x − 5 kannst du jede reelle Zahl einsetzen. Es gibt nichts, was nicht ausrechenbar wäre. Der Definitionsbereich ist ganz ℝ.',
-      rounds: [
-        { formula: 'f(x) = x<sup>2</sup> + 3', f: function (x) { return x * x + 3; }, cards: [-3, 0, 2.5, 7],
-          opts: [['ℝ', 1], ['ℝ \\ {0}', 0], ['ℝ⁺ (nur x > 0)', 0], ['ℝ \\ {−3}', 0]], df: 'ℝ' },
-        { formula: 'f(x) = 2x − 5', f: function (x) { return 2 * x - 5; }, cards: [-4, 0, 1.5, 10],
-          opts: [['ℝ', 1], ['ℝ \\ {2,5}', 0], ['x ≥ 0', 0], ['ℝ \\ {0}', 0]], df: 'ℝ' }
-      ] },
-    { name: 'Verbotene Zahlen',
-      rule: 'Im Nenner eines Bruchs darf nie null stehen. Setze den Nenner gleich null, löse die Gleichung und schließe diese Zahl aus. Bei 1/(x − 2) ist das die 2: D<sub>f</sub> = ℝ \\ {2}. Negative Funktionswerte sind dagegen völlig in Ordnung.',
-      rounds: [
-        { formula: 'f(x) = ' + frac(1, 'x − 2'), f: function (x) { return 1 / (x - 2); }, den: function (x) { return x - 2; },
-          denText: function (x) { return fmt(x) + ' − 2'; }, cards: [-3, 0, 1.9, 2, 2.1, 5], bad: 2, line: [-3, 6],
-          opts: [['ℝ \\ {2}', 1], ['ℝ', 0], ['ℝ \\ {−2}', 0], ['x > 2', 0]], df: 'ℝ \\ {2}' },
-        { formula: 'f(x) = ' + frac(3, 'x + 1'), f: function (x) { return 3 / (x + 1); }, den: function (x) { return x + 1; },
-          denText: function (x) { return fmt(x) + ' + 1'; }, cards: [-2, -1, -0.9, 0, 4], bad: -1, line: [-4, 4],
-          opts: [['ℝ \\ {−1}', 1], ['ℝ \\ {1}', 0], ['ℝ', 0], ['x > −1', 0]], df: 'ℝ \\ {−1}' }
-      ] }
+  var STATIONS = [
+    { icon: '🚪', topic: 'Definitionsbereich', title: 'Darf x rein?', unit: 'Runde', module: function () { return window.LernicusDarfXRein; },
+      goal: 'Verstehen und bestimmen, welche reellen x-Werte in eine Funktion eingesetzt werden dürfen.',
+      explain: '<p>Stell dir eine Funktion als Club vor. Die Zahlen sind Gäste. Der <b>Definitionsbereich D<sub>f</sub></b> ist die Gästeliste: alle reellen x, für die man f(x) ausrechnen kann.</p>' +
+        '<ul><li><b>Polynome</b> wie <span class="formula-inline">x² + 3</span> oder <span class="formula-inline">2x − 5</span>: Jede reelle Zahl darf rein. D<sub>f</sub> = ℝ.</li>' +
+        '<li><b>Brüche</b>: Der Nenner darf nie null werden. Setze den Nenner gleich null, löse die Gleichung und schließe diese Zahl aus.</li></ul>',
+      example: '<p>Bestimme den Definitionsbereich von <span class="formula-inline">f(x) = ' + frac(5, 'x + 4') + '</span>.</p><div class="worked">' +
+        '<div><p>Nenner gleich null setzen: <span class="eq">x + 4 = 0 ⇔ x = −4</span></p></div>' +
+        '<div><p>Diese Zahl ausschließen: <span class="eq">D<sub>f</sub> = ℝ \\ {−4}</span>, gesprochen „ℝ ohne −4“.</p></div>' +
+        '<div><p>Probe: x = −3,9 ergibt den Nenner 0,1. Das ist erlaubt. Nur genau −4 muss draußen bleiben.</p></div></div>' },
+    { icon: '🎯', topic: 'Achsenschnittpunkte', title: 'Schatzsuche im Koordinatensystem', unit: 'Runde', module: function () { return window.LernicusAchsen; },
+      goal: 'Nullstellen mit f(x) = 0 und den y-Achsenschnittpunkt mit f(0) berechnen.',
+      explain: '<p>Der Graph ist eine Schatzkarte. Die Schätze liegen dort, wo er die Koordinatenachsen trifft.</p>' +
+        '<ul><li><b>Nullstellen</b> (x-Achse): Dort ist y = 0. Du löst <span class="formula-inline">f(x) = 0</span>.</li>' +
+        '<li><b>y-Achsenschnittpunkt</b>: Dort ist x = 0. Du berechnest <span class="formula-inline">f(0)</span>.</li>' +
+        '<li>Ein Punkt im Ursprung (0 | 0) liegt auf beiden Achsen und zählt als <b>ein</b> Fund.</li></ul>',
+      example: '<p>Achsenschnittpunkte von <span class="formula-inline">f(x) = x² − 1</span>:</p><div class="worked">' +
+        '<div><p>Nullstellen: <span class="eq">x² − 1 = 0 ⇔ x² = 1 ⇔ x = −1 oder x = 1</span>. Punkte: (−1 | 0) und (1 | 0).</p></div>' +
+        '<div><p>y-Achse: <span class="eq">f(0) = 0² − 1 = −1</span>. Punkt: (0 | −1).</p></div></div>' },
+    { icon: '🪞', topic: 'Symmetrie', title: 'Die zerrissene Schatzkarte', unit: 'Karte', module: function () { return window.LernicusSymmetrie; },
+      goal: 'Achsensymmetrie zur y-Achse und Punktsymmetrie zum Ursprung grafisch untersuchen und rechnerisch prüfen.',
+      explain: '<ul><li>🪞 <b>Magischer Spiegel</b> (Achsensymmetrie zur y-Achse): Aus (x | y) wird (−x | y). Rechnerisch: <span class="formula-inline">f(−x) = f(x)</span>.</li>' +
+        '<li>🔄 <b>Drehschlüssel</b> (Punktsymmetrie zum Ursprung): Aus (x | y) wird (−x | −y), eine Drehung um 180°. Rechnerisch: <span class="formula-inline">f(−x) = −f(x)</span>.</li></ul>' +
+        '<p class="callout">Einzelne passende Punktpaare sind nur <b>Hinweise</b>. Erst die Rechnung mit −x zeigt, dass die Symmetrie für den <b>gesamten</b> Graphen gilt.</p>',
+      example: '<p>Prüfe <span class="formula-inline">f(x) = x⁴ − 2x²</span> auf Symmetrie.</p><div class="worked">' +
+        '<div><p>−x einsetzen: <span class="eq">f(−x) = (−x)⁴ − 2·(−x)² = x⁴ − 2x²</span></p></div>' +
+        '<div><p>Vergleichen: Das ist genau f(x). Also gilt <span class="eq">f(−x) = f(x)</span> für alle x.</p></div>' +
+        '<div><p>Ergebnis: Der Graph ist achsensymmetrisch zur y-Achse. Zum Vergleich: Bei g(x) = x³ − x gilt g(−x) = −x³ + x = −g(x), also Punktsymmetrie.</p></div></div>' }
   ];
-  var SOON = ['Wurzeln', 'Logarithmus', 'Regeln kombinieren'];
 
-  var maxScore = 0;
-  LEVELS.forEach(function (L) { L.rounds.forEach(function (R) {
-    maxScore += R.cards.length * 10 + (R.den ? 5 + 10 : 0) + 10;
-  }); });
+  var st = load();
+  function load() {
+    var d = { done: [false, false, false], coins: [0, 0, 0] };
+    try { var j = JSON.parse(localStorage.getItem(KEY)); if (j && j.done) { d.done = j.done.slice(0, 3); d.coins = (j.coins || [0, 0, 0]).slice(0, 3); } } catch (e) {}
+    return d;
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function status(i) { return st.done[i] ? 'done' : (i === 0 || st.done[i - 1]) ? 'current' : 'locked'; }
+  function unlocked(i) { return status(i) !== 'locked'; }
+  function totalCoins() { return st.coins.reduce(function (a, b) { return a + b; }, 0); }
+  function updateCoins() { var c = totalCoins(); document.getElementById('coins').innerHTML = c ? '🪙 Schatz gesamt: <b>' + c + '</b> Münzen' : 'Lernpfad Schatzkarte'; }
 
-  var best = 0;
-  try { best = parseInt(localStorage.getItem(KEY), 10) || 0; } catch (e) {}
-  var stage = document.getElementById('stage');
-  var plaqueEl = document.getElementById('plaque');
-  var sceneEl = document.getElementById('scene');
-  var guestsEl, bubbleEl, guestEls = [], sceneKey = '', runId = 0;
-  var s;
+  function toast(t) {
+    var el = document.createElement('div'); el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = t;
+    document.body.appendChild(el); setTimeout(function () { el.remove(); }, 2600);
+  }
 
-  /* ---------- Szene ---------- */
-  function logoSvg() {
-    var n = '#1f3a5f';
-    return '<g fill="' + n + '">' +
-      '<polygon points="16,24 50,11 84,24 50,37"/><path d="M31 29 v11 q19 9 38 0 v-11 l-19 8z"/>' +
-      '<path d="M82 25 v12" stroke="' + n + '" stroke-width="2" fill="none"/><circle cx="82" cy="39" r="2.4"/>' +
-      '<path d="M26 52 L29 36 L40 42 L60 42 L71 36 L74 52 q0 11 -24 11 q-24 0 -24 -11z"/>' +
-      '<ellipse cx="50" cy="76" rx="26" ry="23"/></g>' +
-      '<circle cx="40" cy="49" r="10" fill="#fff"/><circle cx="60" cy="49" r="10" fill="#fff"/>' +
-      '<circle cx="40" cy="49" r="5" fill="' + n + '"/><circle cx="60" cy="49" r="5" fill="' + n + '"/>' +
-      '<circle cx="40" cy="49" r="1.8" fill="#fff"/><circle cx="60" cy="49" r="1.8" fill="#fff"/>' +
-      '<path d="M46 56 L50 63 L54 56z" fill="#fff"/>' +
-      '<path d="M50 62 C38 66 36 82 50 94 C64 82 62 66 50 62z" fill="none" stroke="#fff" stroke-width="2.2"/>' +
-      '<path d="M45 72q2.5 3 5 0M52 72q2.5 3 5 0M42 79q2.5 3 5 0M49 79q2.5 3 5 0M56 79q2.5 3 5 0M46 86q2.5 3 5 0M52 86q2.5 3 5 0" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
-      '<g fill="' + n + '"><path d="M8 90 Q32 86 50 97 V103 Q30 93 8 96z"/><path d="M92 90 Q68 86 50 97 V103 Q70 93 92 96z"/><rect x="6" y="103" width="88" height="3" rx="1.5"/></g>' +
-      '<path d="M14 93 Q32 90 47 99M86 93 Q68 90 53 99" stroke="#fff" stroke-width="1.3" fill="none"/>';
+  /* ---------- Schatzkarte ---------- */
+  var POS = [[96, 118], [300, 268], [104, 418]];
+  var SEGS = ['M96 118 C 150 200, 262 170, 300 268', 'M300 268 C 336 350, 170 330, 104 418', 'M104 418 C 140 500, 262 505, 318 478'];
+  function mapView() {
+    var n = st.done.filter(Boolean).length, all = n === 3;
+    var svg = '<svg viewBox="0 0 400 540" aria-hidden="true" focusable="false">' +
+      '<rect class="tm-sea" width="400" height="540"/>' +
+      '<path class="tm-land" d="M40 70 C 30 30, 120 22, 170 40 C 230 60, 300 30, 350 70 C 392 104, 380 170, 362 220 C 348 262, 390 300, 372 352 C 356 400, 384 470, 340 512 C 300 548, 200 520, 140 522 C 80 524, 30 500, 26 450 C 22 400, 48 360, 40 312 C 32 262, 10 220, 22 170 C 30 130, 50 108, 40 70 Z"/>' +
+      '<path class="tm-wave" d="M8 24 q6 -6 12 0 q6 6 12 0 M352 20 q6 -6 12 0 q6 6 12 0 M6 270 q6 -6 12 0 q6 6 12 0 M376 420 q6 -6 12 0 q6 6 12 0 M12 520 q6 -6 12 0 q6 6 12 0"/>' +
+      '<g class="tm-deco"><path d="M200 120 l14 -22 l14 22 M222 120 l12 -18 l12 18"/><path d="M196 400 l10 -16 l10 16"/>' +
+      '<path d="M60 230 q8 -26 4 -40 M64 190 q-14 -4 -20 6 M64 190 q12 -8 22 0 M64 190 q-2 -12 -12 -14"/>' +
+      '<path d="M250 380 q8 -26 4 -40 M254 340 q-14 -4 -20 6 M254 340 q12 -8 22 0"/></g>' +
+      '<g transform="translate(336 120)"><circle r="24" class="tm-deco"/><path d="M0 -30 L6 0 L0 30 L-6 0 Z" fill="var(--trail)" opacity=".8"/><path d="M-30 0 L0 5 L30 0 L0 -5 Z" fill="var(--parch-line)"/><text class="tm-text" y="-34" text-anchor="middle">N</text></g>' +
+      '<text class="tm-text" x="200" y="60" text-anchor="middle">Insel der Kurvendiskussion</text>' +
+      SEGS.map(function (d, i) { return '<path class="tm-seg ' + (st.done[i] ? 'done' : 'todo') + '" d="' + d + '"/>'; }).join('') +
+      (all ? '' : '<path class="tm-x todo" d="M306 466 L330 490 M330 466 L306 490"/>') +
+      '</svg>';
+    var nodes = STATIONS.map(function (S, i) {
+      var c = status(i), p = POS[i];
+      var badge = c === 'done' ? '✓' : c === 'current' ? 'Los' : '🔒';
+      var stt = c === 'done' ? '✓ Abgeschlossen' : c === 'current' ? '▶ Aktuelle Station' : '🔒 Gesperrt';
+      var aria = 'Station ' + (i + 1) + ': ' + S.topic + ', ' + stt.replace(/^[^ ]+ /, '');
+      var lblPos = i === 1 ? 'right:' + ((400 - p[0] + 44) / 4) + '%;top:' + ((p[1] - 34) / 5.4) + '%;text-align:right' : 'left:' + ((p[0] + 44) / 4) + '%;top:' + ((p[1] - 34) / 5.4) + '%';
+      return '<button class="node ' + c + '" style="left:' + (p[0] / 4) + '%;top:' + (p[1] / 5.4) + '%" data-go="' + i + '" aria-label="' + aria + '"' + (c === 'locked' ? ' aria-disabled="true"' : '') + '><span class="emo">' + S.icon + '</span><span class="badge" aria-hidden="true">' + badge + '</span></button>' +
+        '<div class="nlabel ' + c + '" style="' + lblPos + '"><small>Station ' + (i + 1) + '</small><b>' + S.topic + '</b><span class="st">' + stt + '</span></div>';
+    }).join('');
+    var chest = all ? '<div class="goalchest" style="left:' + (334 / 4) + '%;top:' + (490 / 5.4) + '%;z-index:3">' + LC.chest(true, 56) + '</div>' : '';
+    var next = st.done.indexOf(false);
+    var intro = all ? '<div class="st-done finale">' + LC.chest(true, 48) + '<div><h2>Schatz gefunden!</h2><p style="margin:0">Du hast alle drei Stationen geschafft und <b>' + totalCoins() + ' Münzen</b> gesammelt. Weitere Themen der Kurvendiskussion folgen bald. Du kannst jede Station wiederholen.</p></div></div>'
+      : '<p class="sub" style="margin:0">' + (n === 0 ? 'Folge dem Weg über die Insel. Jede Station ist ein kleines Abenteuer mit Erklärung, Beispiel und Spiel. Kein Zeitdruck, keine Leben, die du verlieren kannst.' : 'Stark! Weiter geht es mit Station ' + (next + 1) + ': ' + STATIONS[next].topic + '.') + '</p>';
+    view.innerHTML =
+      '<div class="pathhead"><h1>Die Schatzkarte</h1></div>' + intro +
+      '<div class="overall"><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="3" aria-valuenow="' + n + '" aria-label="Fortschritt auf dem Lernpfad"><i style="width:' + (n / 3 * 100) + '%"></i></div><span>' + n + ' von 3 Stationen</span></div>' +
+      '<div class="tmap">' + svg + chest + nodes + '</div>' +
+      '<div class="legend" aria-hidden="true"><span><i class="l1"></i>abgeschlossen</span><span><i class="l2"></i>aktuell</span><span><i class="l3"></i>gesperrt</span></div>' +
+      '<p class="fine">Dein Fortschritt wird in diesem Browser gespeichert. <button class="linkbtn" data-reset>Fortschritt zurücksetzen</button></p>';
   }
-  function lampSvg() {
-    var o = '';
-    o += '<circle cx="150" cy="70" r="44" fill="url(#glow)" style="opacity:var(--lampop)"/>';
-    // Mast mit Fuß, Ring und geschwungenem Ausleger
-    o += '<rect class="s-pole" x="108" y="236" width="20" height="14" rx="2"/><rect class="s-pole" x="112" y="228" width="12" height="10" rx="2"/>';
-    o += '<rect class="s-pole" x="115" y="64" width="6" height="168"/>';
-    o += '<path class="s-pole" d="M115 66 q0 -16 20 -16 h16 v5 h-16 q-15 0 -15 11z"/>';
-    // Lampenkopf
-    o += '<path class="s-pole" d="M142 50 h28 l-4 8 h-20z"/><path d="M146 58 h20 l-3 6 h-14z" fill="var(--lamp)"/>';
-    // Querstange und Banner mit Logo
-    o += '<rect class="s-pole" x="62" y="80" width="60" height="4" rx="2"/><circle class="s-pole" cx="62" cy="82" r="3.5"/>';
-    o += '<path d="M70 84 v-1M118 84 v-1" stroke="var(--pole)" stroke-width="1.5"/>';
-    o += '<path d="M70 83 H118 V157 L94 147 L70 157Z" fill="#f6f8fb" stroke="#1f3a5f" stroke-width="1.6" stroke-linejoin="round"/>';
-    o += '<g transform="translate(76 89) scale(.36)">' + logoSvg() + '</g>';
-    o += '<text x="94" y="139" text-anchor="middle" font-size="6.4" font-weight="800" fill="#1f3a5f" letter-spacing=".3" font-family="Bricolage Grotesque, Trebuchet MS, sans-serif">LERNICUS</text>';
-    return o;
-  }
-  function sceneSvg() {
-    var o = [], i, c;
-    o.push('<svg viewBox="0 0 560 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">');
-    o.push('<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky-top)"/><stop offset="1" style="stop-color:var(--sky-bot)"/></linearGradient>' +
-      '<radialGradient id="glow"><stop offset="0" style="stop-color:var(--lamp);stop-opacity:.8"/><stop offset="1" style="stop-color:var(--lamp);stop-opacity:0"/></radialGradient></defs>');
-    o.push('<rect width="560" height="300" fill="url(#sky)"/>');
-    var houses = [[0, 120, 64, 130, 's-house2', [10, 36], [134, 160, 186]], [66, 92, 84, 158, 's-house', [76, 100, 124], [106, 134, 162, 190]], [152, 130, 92, 120, 's-house2', [162, 186, 210], [144, 172, 200]]];
-    houses.forEach(function (H) {
-      o.push('<rect class="' + H[4] + '" x="' + H[0] + '" y="' + H[1] + '" width="' + H[2] + '" height="' + H[3] + '"/>');
-      H[5].forEach(function (wx) { H[6].forEach(function (wy) { o.push('<rect class="s-win" x="' + wx + '" y="' + wy + '" width="14" height="16" rx="1"/>'); }); });
-    });
-    o.push('<rect class="s-trunk" x="54" y="196" width="8" height="56"/><circle class="s-tree" cx="58" cy="184" r="26"/><circle class="s-tree" cx="40" cy="198" r="18"/><circle class="s-tree" cx="76" cy="198" r="18"/>');
-    o.push(lampSvg());
-    o.push('<rect class="s-bench" x="172" y="238" width="38" height="5" rx="1"/><rect class="s-bench" x="172" y="227" width="38" height="4" rx="1"/><rect class="s-bench" x="175" y="243" width="3" height="9"/><rect class="s-bench" x="204" y="243" width="3" height="9"/>');
-    o.push('<rect class="s-pave" x="0" y="250" width="560" height="50"/><rect class="s-curb" x="0" y="250" width="560" height="4"/>');
-    for (i = 0; i < 11; i++) o.push('<path class="s-curb" d="M' + (i * 56) + ' 254 L' + (i * 56 - 12) + ' 300" stroke="var(--curb)" stroke-width="1.5" opacity=".6" fill="none"/>');
-    // Club
-    o.push('<rect class="s-trim" x="240" y="26" width="326" height="12" rx="2"/><rect class="s-wall" x="246" y="34" width="314" height="216" rx="3"/>');
-    o.push('<rect class="s-inter" x="300" y="58" width="248" height="192"/><rect class="s-inter" x="258" y="118" width="44" height="132"/>');
-    for (c = 0; c < 8; c++) {
-      o.push('<rect class="' + (c % 2 ? 's-fa' : 's-fb') + '" x="' + (300 + c * 31) + '" y="214" width="31" height="19"/>');
-      o.push('<rect class="' + (c % 2 ? 's-fb' : 's-fa') + '" x="' + (300 + c * 31) + '" y="233" width="31" height="17"/>');
-    }
-    o.push('<rect class="s-fb" x="258" y="214" width="42" height="36"/>');
-    o.push('<polygon class="beam" points="424,90 350,214 392,214" fill="#ff5fa2"/><polygon class="beam b2" points="424,90 410,214 462,214" fill="#46d3ff"/><polygon class="beam b3" points="424,90 482,214 526,214" fill="#ffd24a"/>');
-    o.push('<rect class="s-spk" x="306" y="150" width="24" height="62" rx="3"/><circle cx="318" cy="166" r="6" fill="none" stroke="#6b5a8c" stroke-width="2"/><circle cx="318" cy="193" r="9" fill="none" stroke="#6b5a8c" stroke-width="2"/>');
-    o.push('<rect class="s-spk" x="518" y="150" width="24" height="62" rx="3"/><circle cx="530" cy="166" r="6" fill="none" stroke="#6b5a8c" stroke-width="2"/><circle cx="530" cy="193" r="9" fill="none" stroke="#6b5a8c" stroke-width="2"/>');
-    o.push('<path d="M424 58 V76" stroke="#8d97b0" stroke-width="2"/><circle class="s-ball" cx="424" cy="90" r="14"/><path d="M410 90h28M424 76v28" stroke="#8d97b0" stroke-width="1.2" fill="none"/><ellipse cx="424" cy="90" rx="7" ry="14" fill="none" stroke="#8d97b0" stroke-width="1.2"/>');
-    o.push('<circle cx="326" cy="72" r="5" fill="#ff5fa2"/><circle cx="520" cy="72" r="5" fill="#46d3ff"/>');
-    o.push('<rect x="256" y="116" width="48" height="136" fill="none" stroke="var(--trim)" stroke-width="5"/>');
-    o.push('<rect class="s-sign" x="232" y="62" width="94" height="38" rx="7" stroke="#ff5fa2" stroke-width="2"/><text class="s-neon" x="279" y="89" text-anchor="middle" font-size="21" font-weight="800" fill="#ff7ab8" font-family="Bricolage Grotesque, Trebuchet MS, sans-serif">x-Club</text>');
-    o.push('<path d="M258 250 L302 250 L324 288 L238 288 Z" fill="#b3222f" opacity=".92"/>');
-    // Student als Türsteher
-    var skin = '#e2a982', hood = '#e8743b', hood2 = '#cf5f2a', pack = '#3a3a4c';
-    o.push('<g>' +
-      '<ellipse cx="228" cy="274" rx="28" ry="5" fill="#000" opacity=".22"/>' +
-      '<rect x="204" y="186" width="50" height="46" rx="12" fill="' + pack + '"/>' +
-      '<rect x="214" y="230" width="12" height="38" rx="3" fill="#35507a"/><rect x="232" y="230" width="12" height="38" rx="3" fill="#35507a"/>' +
-      '<rect x="210" y="264" width="19" height="8" rx="4" fill="#f4f4f4"/><rect x="229" y="264" width="19" height="8" rx="4" fill="#f4f4f4"/>' +
-      '<rect x="209" y="184" width="40" height="52" rx="14" fill="' + hood + '"/>' +
-      '<path d="M214 186 q15 14 30 0 q-4 -6 -15 -6 q-11 0 -15 6z" fill="' + hood2 + '"/>' +
-      '<rect x="218" y="216" width="22" height="11" rx="4" fill="' + hood2 + '"/>' +
-      '<path d="M217 190v26M241 190v26" stroke="' + pack + '" stroke-width="3" fill="none"/>' +
-      '<path d="M222 190 L229 212 L236 190" stroke="#d9415a" stroke-width="2" fill="none"/><rect x="224" y="210" width="10" height="13" rx="2" fill="#fff"/><rect x="226" y="213" width="6" height="2" fill="#98a2b3"/>' +
-      '<circle cx="229" cy="166" r="15" fill="' + skin + '"/>' +
-      '<path d="M213 164 q-1 -19 16 -19 q17 0 16 19 q-5 -9 -16 -9 q-11 0 -16 9z" fill="#2c2830"/>' +
-      '<circle cx="223" cy="169" r="5" fill="none" stroke="#1c1c24" stroke-width="1.6"/><circle cx="235" cy="169" r="5" fill="none" stroke="#1c1c24" stroke-width="1.6"/><path d="M228 169h2" stroke="#1c1c24" stroke-width="1.6"/><circle cx="223" cy="169" r="1.5" fill="#1c1c24"/><circle cx="235" cy="169" r="1.5" fill="#1c1c24"/>' +
-      '<path class="m-smile" d="M224 177 q5 5 10 0" stroke="#7a3b2a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path class="m-flat" d="M225 178 h8" stroke="#7a3b2a" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
-      '<path d="M211 192 q-8 12 -2 26 l8 2" stroke="' + hood + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-      '<rect x="207" y="206" width="20" height="26" rx="3" fill="#1d2433"/><rect x="209.5" y="209" width="15" height="20" rx="1.5" fill="#dfe9ff"/><path d="M212 214h9M212 218h9M212 222h6" stroke="#5a6ea3" stroke-width="1.4"/><circle cx="214" cy="228" r="4" fill="' + skin + '"/>' +
-      '<g class="a-idle"><path d="M247 192 q8 14 2 28" stroke="' + hood + '" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="249" cy="223" r="4" fill="' + skin + '"/></g>' +
-      '<g class="a-in"><path d="M247 192 L266 198 L284 194" stroke="' + hood + '" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="288" cy="194" r="4.2" fill="' + skin + '"/><path d="M291 193 h6" stroke="' + skin + '" stroke-width="3" stroke-linecap="round"/></g>' +
-      '<g class="a-out"><path d="M247 192 L260 188 L260 170" stroke="' + hood + '" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="254.5" y="154" width="11" height="16" rx="5" fill="' + skin + '"/></g>' +
-      '</g>');
-    o.push('</svg>');
-    return o.join('');
-  }
-  function buildScene() {
-    sceneEl.innerHTML = sceneSvg() + '<div class="guests" id="guests"></div><div class="bubble" id="bubble"></div>';
-    guestsEl = document.getElementById('guests');
-    bubbleEl = document.getElementById('bubble');
-  }
-  function syncScene() {
-    var r = R(), key = runId + '-' + s.li + '-' + s.ri;
-    if (key !== sceneKey) {
-      sceneKey = key; guestsEl.innerHTML = ''; guestEls = [];
-      r.cards.forEach(function (c, i) {
-        var g = document.createElement('div');
-        g.className = 'guest pop wait';
-        g.style.setProperty('--h', String((i * 57 + 20) % 360));
-        g.style.animationDelay = (i * 0.12) + 's';
-        g.innerHTML = '<span>' + fmt(c) + '</span>';
-        g.dataset.st = '';
-        guestsEl.appendChild(g); guestEls.push(g);
-      });
-    }
-    var inK = 0, outK = 0;
-    r.cards.forEach(function (c, i) {
-      var g = guestEls[i], m = s.marks[i], st, L, B, k;
-      if (m === 'in') { k = inK++; st = 'in'; L = 63 + (k % 4) * 10; B = (k < 4 ? 17 : 25) + (k % 2 ? 2 : 0); }
-      else if (m === 'out') { k = outK++; st = 'out'; L = 8 + k * 9; B = 1.5; }
-      else if (i === s.ci) { st = 'cur'; L = 31; B = 8; }
-      else { var j = i - s.ci, step = Math.min(6, 24 / Math.max(1, r.cards.length - 1)); st = 'wait'; L = 29 - j * step; B = j % 2 ? 15.5 : 8; }
-      g.style.zIndex = String(Math.round(100 - B));
-      if (st === 'in' && g.dataset.st !== 'in') {
-        g.style.left = '49%'; g.style.bottom = '14%';
-        clearTimeout(g._t);
-        g._t = setTimeout((function (gg, l, b) { return function () { gg.style.left = l + '%'; gg.style.bottom = b + '%'; }; })(g, L, B), 550);
-      } else { g.style.left = L + '%'; g.style.bottom = B + '%'; }
-      if (g.dataset.st !== st) {
-        g.dataset.st = st;
-        g.className = 'guest ' + st;
-        if (st === 'in') g.style.animationDelay = ((i * 0.17) % 0.8) + 's';
+
+  /* ---------- Station ---------- */
+  function stationView(i) {
+    var S = STATIONS[i], c = status(i);
+    view.innerHTML =
+      '<nav class="crumbs"><a href="#/">← Zur Schatzkarte</a><span>Station ' + (i + 1) + ' von 3</span></nav>' +
+      '<div class="st-head"><span class="st-icon' + (c === 'done' ? ' done' : '') + '" aria-hidden="true">' + S.icon + '</span><div><small>Station ' + (i + 1) + ' · ' + S.topic + (c === 'done' ? ' · ✓ abgeschlossen' : '') + '</small><h1>' + S.title + '</h1></div></div>' +
+      '<div class="overall"><div class="bar" role="progressbar" aria-label="Fortschritt in dieser Station"><i id="stbar"></i></div><span id="sttext"></span></div>' +
+      '<p class="goal"><b>Lernziel:</b> ' + S.goal + '</p>' +
+      '<section class="card"><h2>Kurz erklärt</h2>' + S.explain + '</section>' +
+      '<details class="card"' + (c === 'done' ? '' : ' open') + '><summary>Vorgerechnetes Beispiel</summary>' + S.example + '</details>' +
+      '<section class="play"><h2>Jetzt spielen</h2><div id="game"></div></section>' +
+      '<div id="stdone"></div>';
+    var bar = document.getElementById('stbar'), txt = document.getElementById('sttext');
+    S.module().mount(document.getElementById('game'), {
+      onProgress: function (d, t) { bar.style.width = (d / t * 100) + '%'; txt.textContent = d + ' von ' + t + ' ' + S.unit + 'n'; },
+      onFinish: function (coins) {
+        var first = !st.done[i];
+        st.done[i] = true; st.coins[i] = Math.max(st.coins[i] || 0, coins || 0); save(); updateCoins();
+        var nx = i + 1 < 3;
+        var el = document.getElementById('stdone');
+        el.innerHTML = '<div class="st-done" role="status"><h2>' + (first ? '🎉 Station ' + (i + 1) + ' geschafft!' : '✓ Station wiederholt') + '</h2>' +
+          '<p style="margin:0">' + (nx ? (first ? 'Auf der Schatzkarte ist jetzt Station ' + (i + 2) + ' freigeschaltet: ' + STATIONS[i + 1].topic + '.' : 'Weiter geht es mit Station ' + (i + 2) + '.') : 'Du hast den ganzen Lernpfad geschafft. Auf der Karte wartet der Schatz!') + '</p>' +
+          '<div class="row">' + (nx ? '<a class="btn go" style="text-align:center;text-decoration:none" href="#/' + (i + 2) + '">Weiter zu Station ' + (i + 2) + ' ' + STATIONS[i + 1].icon + '</a>' : '<a class="btn go" style="text-align:center;text-decoration:none" href="#/">Zum Schatz ✕</a>') +
+          '<a class="btn" style="text-align:center;text-decoration:none" href="#/">Zur Schatzkarte</a></div></div>';
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
     });
-    var ended = s.phase === 'levelEnd' || s.phase === 'finish';
-    var bt = ended ? 'Gute Arbeit!' : s.phase === 'roundEnd' ? 'Der Club ist offen.' : s.phase === 'line' ? 'Wer war draußen?' : s.phase === 'domain' ? 'Die Gästeliste?' : s.bubble;
-    bubbleEl.textContent = bt;
-    sceneEl.setAttribute('data-mood', (s.phase === 'cards' || s.phase === 'reason' || s.phase === 'explain') ? s.mood : 'idle');
   }
 
-  /* ---------- Spiellogik ---------- */
-  function shuffle(a) { return a.map(function (v) { return [Math.random(), v]; }).sort(function (x, y) { return x[0] - y[0]; }).map(function (p) { return p[1]; }); }
-  function fresh() { runId++; return { li: 0, ri: 0, ci: 0, phase: 'cards', tries: 0, rt: 0, lt: 0, dt: 0, score: 0, msg: null, marks: [], anim: '', picked: null, reasons: null, opts: null, mood: 'idle', bubble: 'Wer darf rein?' }; }
-  function R() { return LEVELS[s.li].rounds[s.ri]; }
-  function isBad(x) { var r = R(); return !!r.den && Math.abs(r.den(x)) < 1e-9; }
-  function setRound() { s.ci = 0; s.marks = []; s.tries = s.rt = s.lt = s.dt = 0; s.phase = 'cards'; s.msg = null; s.anim = ''; s.mood = 'idle'; s.bubble = 'Wer darf rein?'; s.opts = shuffle(R().opts.map(function (o) { return o.slice(); })); }
-  function reveal(x) { s.mood = isBad(x) ? 'out' : 'in'; s.bubble = isBad(x) ? 'Heute nicht.' : 'Komm rein!'; }
-
-  function fbHtml() { return s.msg ? '<div class="fb ' + (s.msg.k || '') + '" role="status">' + s.msg.t + '</div>' : ''; }
-  function ticketHtml(x, state) {
-    var cl = state === 'in' ? 'ok' : state === 'out' ? 'no' : '';
-    var stamp = state === 'in' ? '<span class="stamp">Drin</span>' : state === 'out' ? '<span class="stamp">Draußen</span>' : '';
-    return '<div class="ticket ' + cl + ' ' + (s.anim || '') + '"><div><div class="lbl">Will rein: x =</div><div class="num">' + fmt(x) + '</div></div>' + stamp + '</div>';
-  }
-  function plaque() { return '<div class="plaque"><small>Die Funktion am Eingang</small><div class="formula">' + R().formula + '</div></div>'; }
-
-  function explain(x) {
-    var r = R(), v;
-    if (isBad(x)) {
-      return '<b>Muss draußen bleiben.</b> Für x = ' + fmt(x) + ' wird der Nenner ' + r.denText(x) + ' = 0. Durch null dürfen wir nicht teilen.';
-    }
-    v = r.f(x);
-    var t = '<b>Darf rein.</b> Für x = ' + fmt(x) + ' ergibt sich f(' + fmt(x) + ') = ' + fmt(v) + '.';
-    if (r.den) {
-      t += ' Der Nenner ist ' + r.denText(x) + ' = ' + fmt(r.den(x)) + ', also nicht null.';
-      if (v < 0) t += ' Ein negatives Ergebnis ist erlaubt.';
-    }
-    return t;
+  function route() {
+    var m = location.hash.match(/^#\/([1-3])$/);
+    if (m) {
+      var i = +m[1] - 1;
+      if (!unlocked(i)) { location.replace('#/'); toast('Diese Station ist noch gesperrt. Schließe zuerst Station ' + i + ' ab.'); return; }
+      stationView(i);
+    } else mapView();
+    updateCoins();
+    window.scrollTo(0, 0);
   }
 
-  function render() {
-    var r = R(), L = LEVELS[s.li], x = r.cards[s.ci], h = '';
-    document.getElementById('score').innerHTML = 'Punkte <b>' + s.score + '</b> / ' + maxScore + (best ? ' · Bestwert ' + best : '');
-    var lv = LEVELS.map(function (l, i) {
-      var c = s.phase === 'finish' || i < s.li ? 'done' : i === s.li ? 'on' : '';
-      return '<li class="' + c + '">Level ' + (i + 1) + ' · ' + l.name + '</li>';
-    }).join('') + SOON.map(function (n, i) { return '<li class="soon">Level ' + (LEVELS.length + i + 1) + ' · ' + n + ' (bald)</li>'; }).join('');
-    document.getElementById('levels').innerHTML = lv;
-
-    var ended = s.phase === 'finish' || s.phase === 'levelEnd';
-    plaqueEl.innerHTML = ended ? '' : plaque();
-    syncScene();
-
-    if (s.phase === 'finish') {
-      h = '<div class="rule"><h2>Der Club ist geöffnet.</h2><p>Du hast <b>' + s.score + ' von ' + maxScore + ' Punkten</b> geholt.</p>' +
-        '<p class="fine">Du kannst jetzt zwei Fälle erkennen: Es gibt keine Einschränkung, oder der Nenner darf nicht null werden. Als Nächstes folgen Wurzeln und Logarithmen, bei denen ganze Bereiche ausgeschlossen werden.</p>' +
-        '<button class="btn go" id="again" data-a="restart">Noch einmal spielen</button></div>';
-      stage.innerHTML = h; return;
+  view.addEventListener('click', function (e) {
+    var n = e.target.closest('[data-go]');
+    if (n) {
+      var i = +n.dataset.go;
+      if (!unlocked(i)) { toast('🔒 Gesperrt: Schließe zuerst Station ' + i + ' (' + STATIONS[i - 1].topic + ') ab.'); return; }
+      location.hash = '#/' + (i + 1); return;
     }
-    if (s.phase === 'levelEnd') {
-      h = '<div class="rule"><h2>Level ' + (s.li + 1) + ' geschafft: ' + L.name + '</h2><p><b>Regel, die du entdeckt hast:</b></p><p>' + L.rule + '</p>' +
-        '<button class="btn go" id="lnext" data-a="lnext" data-focus>' + (s.li + 1 < LEVELS.length ? 'Weiter zu Level ' + (s.li + 2) : 'Fertig') + '</button></div>';
-      stage.innerHTML = h; return;
+    if (e.target.closest('[data-reset]')) {
+      st = { done: [false, false, false], coins: [0, 0, 0] }; save(); route(); toast('Fortschritt zurückgesetzt.');
     }
-
-    if (s.phase === 'cards' || s.phase === 'reason' || s.phase === 'explain') {
-      var st = s.phase === 'cards' ? '' : (isBad(x) ? 'out' : 'in');
-      h += ticketHtml(x, st);
-    }
-    if (s.phase === 'cards') {
-      h += '<p class="q">Darf diese Zahl in den Club?</p><div class="row">' +
-        '<button class="btn yes" id="b-in" data-a="decide" data-v="in" data-focus>Darf rein</button>' +
-        '<button class="btn no" id="b-out" data-a="decide" data-v="out">Muss draußen bleiben</button></div>' + fbHtml();
-    } else if (s.phase === 'reason') {
-      h += '<p class="q">Warum muss x = ' + fmt(x) + ' draußen bleiben?</p><div class="stack">' +
-        s.reasons.map(function (o, i) { return '<button class="btn" id="reason-' + i + '" data-a="reason" data-i="' + i + '"' + (i === 0 ? ' data-focus' : '') + '>' + o[0] + '</button>'; }).join('') + '</div>' + fbHtml();
-    } else if (s.phase === 'explain') {
-      h += fbHtml() + '<button class="btn go" id="next" data-a="next" data-focus>Nächste Zahl</button>';
-    } else if (s.phase === 'line') {
-      var ticks = '';
-      for (var n = r.line[0]; n <= r.line[1]; n++) {
-        ticks += '<button class="tick' + (s.picked === n ? ' mark' : '') + '" id="tick-' + (n < 0 ? 'm' + (-n) : n) + '" data-a="tick" data-v="' + n + '"><i></i><span>' + fmt(n) + '</span></button>';
-      }
-      h += '<p class="q">Markiere auf der Zahlengeraden die Zahl, die draußen bleiben muss.</p><div class="line" role="group" aria-label="Zahlengerade">' + ticks + '</div>' + fbHtml();
-    } else if (s.phase === 'domain') {
-      h += '<p class="q">Wie lautet der Definitionsbereich?</p><div class="stack">' +
-        s.opts.map(function (o, i) { return '<button class="btn opt" id="dom-' + i + '" data-a="dom" data-i="' + i + '"' + (i === 0 ? ' data-focus' : '') + '>D<sub>f</sub> = ' + o[0] + '</button>'; }).join('') + '</div>' + fbHtml();
-    } else if (s.phase === 'roundEnd') {
-      h += '<div class="rule"><h2>Runde geschafft</h2><p>Für <span class="mono">' + r.formula + '</span> gilt:</p><p class="mono" style="font-size:1.3rem">D<sub>f</sub> = ' + r.df + '</p>' +
-        '<button class="btn go" id="rnext" data-a="rnext" data-focus>' + (s.ri + 1 < L.rounds.length ? 'Nächste Funktion' : 'Level abschließen') + '</button></div>';
-    }
-    stage.innerHTML = h;
-    var f = stage.querySelector('[data-focus]');
-    if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
-  }
-
-  function finishIfDone() {
-    try { if (s.score > best) { best = s.score; localStorage.setItem(KEY, String(best)); } } catch (e) {}
-  }
-
-  stage.addEventListener('click', handle);
-  document.getElementById('restart').addEventListener('click', function () { s = fresh(); setRound(); render(); });
-  function handle(e) {
-    var b = e.target.closest('[data-a]'); if (!b) return;
-    var a = b.dataset.a, r = R(), x = r.cards[s.ci];
-    if (a === 'restart') { s = fresh(); setRound(); render(); return; }
-    if (a === 'decide') {
-      var inn = b.dataset.v === 'in', ok = inn === !isBad(x);
-      if (ok) {
-        s.score += s.tries === 0 ? 10 : 5; s.marks.push(inn ? 'in' : 'out'); s.anim = inn ? 'fly-in' : 'fly-out';
-        reveal(x);
-        if (!inn) { s.phase = 'reason'; s.rt = 0; s.msg = null;
-          s.reasons = shuffle([['Der Nenner wird null.', 1], ['Das Ergebnis wird negativ.', 0], ['Die Zahl ist zu groß.', 0]]);
-        } else { s.phase = 'explain'; s.msg = { k: 'ok', t: explain(x) }; }
-      } else {
-        s.tries++;
-        if (s.tries >= 2) { s.marks.push(isBad(x) ? 'out' : 'in'); s.phase = 'explain'; s.anim = ''; reveal(x); s.msg = { k: 'bad', t: explain(x) }; }
-        else { s.bubble = 'Hmm, sicher?'; s.msg = { k: '', t: isBad(x) ? '<b>Hinweis:</b> Setze die Zahl in den Nenner ein und rechne aus. Was kommt heraus?' : '<b>Hinweis:</b> Setze die Zahl ein und rechne f(x) aus. Geht das ohne Problem?' }; }
-      }
-    } else if (a === 'reason') {
-      var o = s.reasons[+b.dataset.i];
-      if (o[1]) { if (s.rt === 0) s.score += 5; s.phase = 'explain'; s.msg = { k: 'ok', t: explain(x) }; }
-      else { s.rt++;
-        if (s.rt >= 2) { s.phase = 'explain'; s.msg = { k: 'bad', t: explain(x) }; }
-        else s.msg = { k: '', t: '<b>Hinweis:</b> Rechne den Nenner für x = ' + fmt(x) + ' aus: ' + r.denText(x) + '. Was passiert mit dem Bruch?' };
-      }
-    } else if (a === 'next') {
-      s.ci++; s.tries = 0; s.msg = null; s.anim = ''; s.mood = 'idle'; s.bubble = 'Wer darf rein?';
-      if (s.ci >= r.cards.length) { s.phase = r.den ? 'line' : 'domain'; s.picked = null; }
-      else s.phase = 'cards';
-    } else if (a === 'tick') {
-      var n = +b.dataset.v;
-      if (n === r.bad) { if (s.lt === 0) s.score += 10; s.picked = n; s.phase = 'domain'; s.msg = null; }
-      else { s.lt++; s.picked = n;
-        if (s.lt >= 2) { s.picked = r.bad; s.phase = 'domain'; s.msg = { k: 'bad', t: 'Gesucht war die ' + fmt(r.bad) + '. Dort wird der Nenner null.' }; }
-        else s.msg = { k: '', t: '<b>Hinweis:</b> Welche Zahl hat dich vorhin nicht hineingelassen?' };
-      }
-    } else if (a === 'dom') {
-      var op = s.opts[+b.dataset.i];
-      if (op[1]) { if (s.dt === 0) s.score += 10; s.phase = 'roundEnd'; s.msg = null; }
-      else { s.dt++;
-        if (s.dt >= 2) { s.phase = 'roundEnd'; s.msg = null; }
-        else s.msg = { k: '', t: '<b>Hinweis:</b> ' + (r.den ? 'Welche Zahl hast du ausgeschlossen? Nur diese fehlt im Definitionsbereich.' : 'Gab es eine Zahl, die nicht eingesetzt werden konnte?') };
-      }
-    } else if (a === 'rnext') {
-      if (s.ri + 1 < LEVELS[s.li].rounds.length) { s.ri++; setRound(); } else { s.phase = 'levelEnd'; }
-    } else if (a === 'lnext') {
-      if (s.li + 1 < LEVELS.length) { s.li++; s.ri = 0; setRound(); } else { s.phase = 'finish'; finishIfDone(); }
-    }
-    render();
-  }
-
-  buildScene();
-  s = fresh(); setRound(); render();
+  });
+  window.addEventListener('hashchange', route);
+  route();
 })();
 </script>
-
 </body>
 </html>
