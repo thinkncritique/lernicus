@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spiegel und Zauberuhr</title>
+<meta name="description" content="Lernicus: Lernspiel zu Achsen- und Punktsymmetrie mit Spiegel und Zauberuhr.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: oben das Türschild mit der Funktion, darunter die Szene (links Straße mit Warteschlange, Mitte Tür mit dem Studenten als Türsteher, rechts die Zahlen-Party), darunter Karte, Frage und Entscheidung. */
+:root {
+  --bg: #edf0f4;
+  --surface: #ffffff;
+  --ink: #14202e;
+  --muted: #566475;
+  --line: #c9d1db;
+  --accent: #2a4bd4;
+  --accent-ink: #ffffff;
+  --plaque: #14202e;
+  --plaque-ink: #f2f5f9;
+  --yes: #1d7a54;
+  --yes-bg: #dcf0e6;
+  --no: #b3322a;
+  --no-bg: #f8dfdc;
+  --hint-bg: #e6ebfb;
+  --sky-top: #8fb6e6; --sky-bot: #f6dcc0;
+  --house: #9aa8bd; --house2: #b6c1d1; --win: #d7e6f5;
+  --tree: #58935f; --pave: #c9ced4; --curb: #e5e8ec;
+  --wall: #3b4062; --trim: #262a44; --pole: #3b4062; --lamp: #ffe9a8; --lampop: .15;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1520; --surface: #172230; --ink: #e8edf3; --muted: #94a2b2; --line: #2b3a4b;
+    --accent: #8fa8ff; --accent-ink: #0e1520; --plaque: #05090f; --plaque-ink: #eef2f7;
+    --yes: #5bd19a; --yes-bg: #143a2b; --no: #ff8f85; --no-bg: #3e1d1b; --hint-bg: #1f2c4d;
+    --sky-top: #0b1430; --sky-bot: #2b3a66; --house: #1c2844; --house2: #253254; --win: #f3cf6a;
+    --tree: #1f4a35; --pave: #2a3142; --curb: #3a4456; --wall: #2a2e4d; --trim: #1a1d33; --pole: #5a6590; --lampop: .9;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1520; --surface: #172230; --ink: #e8edf3; --muted: #94a2b2; --line: #2b3a4b;
+  --accent: #8fa8ff; --accent-ink: #0e1520; --plaque: #05090f; --plaque-ink: #eef2f7;
+  --yes: #5bd19a; --yes-bg: #143a2b; --no: #ff8f85; --no-bg: #3e1d1b; --hint-bg: #1f2c4d;
+  --sky-top: #0b1430; --sky-bot: #2b3a66; --house: #1c2844; --house2: #253254; --win: #f3cf6a;
+  --tree: #1f4a35; --pave: #2a3142; --curb: #3a4456; --wall: #2a2e4d; --trim: #1a1d33; --pole: #5a6590; --lampop: .9;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; letter-spacing: .02em; color: var(--accent); }
+.score { font-family: var(--font-mono); font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.score b { color: var(--ink); }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 8vw, 2.8rem); line-height: 1.05; margin: 4px 0 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 52ch; }
+
+.levels { display: flex; gap: 8px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0; }
+.levels li { font-size: .8rem; padding: 4px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); display: inline-flex; gap: 6px; }
+.levels li.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.levels li.done { border-color: var(--yes); color: var(--yes); }
+.levels li.soon { border-style: dashed; opacity: .65; }
+
+.plaque { background: var(--plaque); color: var(--plaque-ink); border-radius: 6px; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px; }
+.plaque small { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
+.formula { font-family: var(--font-mono); font-weight: 600; font-size: clamp(1.4rem, 6vw, 1.9rem); display: flex; align-items: center; gap: .4em; flex-wrap: wrap; }
+.frac { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.15; vertical-align: middle; }
+.frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 .3em .05em; }
+.frac > span:last-child { padding: .05em .3em 0; }
+
+/* Szene */
+.scene { position: relative; container-type: inline-size; aspect-ratio: 560 / 300; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--sky-top); }
+.scene svg { width: 100%; height: 100%; display: block; }
+.s-house { fill: var(--house); } .s-house2 { fill: var(--house2); } .s-win { fill: var(--win); }
+.s-tree { fill: var(--tree); } .s-trunk { fill: #6b4f3a; } .s-pole { fill: var(--pole); } .s-bench { fill: #8a6a4a; }
+.s-pave { fill: var(--pave); } .s-curb { fill: var(--curb); }
+.s-wall { fill: var(--wall); } .s-trim { fill: var(--trim); }
+.s-inter { fill: #2a1647; } .s-fa { fill: #4c2b7e; } .s-fb { fill: #37205e; } .s-spk { fill: #150c24; }
+.s-ball { fill: #d5dcec; } .s-sign { fill: #12091f; }
+.s-neon { filter: drop-shadow(0 0 3px #ff5fa2); }
+.beam { animation: beam 2.4s ease-in-out infinite alternate; }
+.beam.b2 { animation-delay: .8s; } .beam.b3 { animation-delay: 1.6s; }
+@keyframes beam { from { opacity: .12; } to { opacity: .42; } }
+.m-flat, .a-in, .a-out, .a-idle { display: none; }
+.scene[data-mood="idle"] .a-idle, .scene[data-mood="in"] .a-in, .scene[data-mood="out"] .a-out { display: inline; }
+.scene[data-mood="out"] .m-flat { display: inline; }
+.scene[data-mood="out"] .m-smile { display: none; }
+
+.guests { position: absolute; inset: 0; pointer-events: none; }
+.guest {
+  position: absolute; width: 2.5em; height: 2.5em; transform: translateX(-50%);
+  border-radius: 50%; background: hsl(var(--h) 75% 84%); color: #1a2233;
+  border: .08em solid hsl(var(--h) 45% 40%);
+  display: grid; place-items: center; font: 600 3.4cqw/1 var(--font-mono);
+  transition: left .8s ease, bottom .8s ease, font-size .5s ease;
+}
+.guest span { font-size: .62em; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.guest::after { content: ""; position: absolute; left: 30%; bottom: -.5em; width: .4em; height: .5em; background: hsl(var(--h) 45% 32%); border-radius: 0 0 .1em .1em; box-shadow: .9em 0 0 hsl(var(--h) 45% 32%); }
+.guest.pop { animation: pop .5s ease; }
+.guest.wait { font-size: 2.9cqw; }
+.guest.cur { font-size: 4.4cqw; box-shadow: 0 0 0 .14em #ffd24a, 0 0 .9em rgba(255, 210, 74, .6); }
+.guest.in { box-shadow: 0 0 .9em hsl(var(--h) 90% 65% / .85); animation: dance .8s ease-in-out infinite alternate; }
+.guest.out { font-size: 3cqw; filter: saturate(.35) brightness(.92); border-color: var(--no); transform: translateX(-50%) rotate(-8deg); }
+@keyframes dance { from { transform: translateX(-50%) translateY(0) rotate(-6deg); } to { transform: translateX(-50%) translateY(-.45em) rotate(6deg); } }
+@keyframes pop { from { opacity: 0; transform: translateX(-50%) scale(.6); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+.bubble {
+  position: absolute; left: 41%; bottom: 55%; transform: translateX(-50%); z-index: 200;
+  background: var(--surface); color: var(--ink); border: 2px solid var(--ink); border-radius: .8em;
+  padding: .3em .7em; font: 600 3.5cqw/1.2 var(--font-display); white-space: nowrap;
+}
+.bubble::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -.4em; border: .4em solid transparent; border-top-color: var(--ink); }
+
+.ticket { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.ticket::before, .ticket::after { content: ""; position: absolute; top: 50%; width: 18px; height: 18px; margin-top: -9px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); }
+.ticket::before { left: -10px; } .ticket::after { right: -10px; }
+.ticket .lbl { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.ticket .num { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 13vw, 3.8rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.ticket .stamp { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; border: 3px solid currentColor; border-radius: 6px; padding: 4px 10px; transform: rotate(-6deg); }
+.ticket.ok { border-color: var(--yes); } .ticket.ok .stamp { color: var(--yes); }
+.ticket.no { border-color: var(--no); } .ticket.no .stamp { color: var(--no); }
+.ticket.fly-in { animation: slideIn .45s ease; } .ticket.fly-out { animation: slideOut .45s ease; }
+@keyframes slideIn { from { transform: translateX(-24px); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes slideOut { from { transform: translateX(24px); opacity: .4; } to { transform: none; opacity: 1; } }
+
+.q { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; margin: 0; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn { border: 2px solid var(--ink); background: var(--surface); border-radius: 6px; padding: 14px 12px; font-weight: 600; min-height: 52px; }
+.btn:hover { background: var(--bg); }
+.btn.yes { border-color: var(--yes); color: var(--yes); }
+.btn.no { border-color: var(--no); color: var(--no); }
+.btn.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.go:hover { filter: brightness(1.08); background: var(--accent); }
+.stack { display: grid; gap: 8px; }
+.opt { text-align: left; font-family: var(--font-mono); font-weight: 500; }
+
+.line { display: flex; gap: 2px; padding: 12px 0 0; border-top: 3px solid var(--ink); position: relative; margin-top: 8px; }
+.tick { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 0 0 4px; }
+.tick i { width: 2px; height: 10px; background: var(--ink); margin-top: -15px; }
+.tick span { font-family: var(--font-mono); font-size: .85rem; padding: 6px 0; width: 100%; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); text-align: center; font-variant-numeric: tabular-nums; }
+.tick:hover span { border-color: var(--ink); }
+.tick.mark span { background: var(--no-bg); border-color: var(--no); color: var(--no); font-weight: 600; }
+
+.fb { border-radius: 6px; padding: 12px 14px; border-left: 5px solid var(--accent); background: var(--hint-bg); }
+.fb.ok { border-color: var(--yes); background: var(--yes-bg); }
+.fb.bad { border-color: var(--no); background: var(--no-bg); }
+.fb b { font-family: var(--font-display); }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 8px; }
+.rule h2 { margin: 0; font-family: var(--font-display); font-size: 1.3rem; }
+.rule p { margin: 0; }
+.mono { font-family: var(--font-mono); }
+.fine { color: var(--muted); font-size: .85rem; }
+.linkbtn { background: none; border: 0; color: var(--muted); text-decoration: underline; padding: 0; font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) {
+  .ticket.fly-in, .ticket.fly-out, .guest.pop, .guest.in, .beam { animation: none; }
+  .guest { transition: none; }
+}
+@media (max-width: 420px) { .row { grid-template-columns: 1fr; } }
+
+/* Symmetrie-Spiel: Zusatzstile */
+[hidden] { display: none !important; }
+.brandrow { display: inline-flex; align-items: center; gap: 8px; }
+.brandrow svg { width: 30px; height: 32px; flex: none; }
+.plot { border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: #1d0f35; }
+.plot svg { display: block; width: 100%; height: auto; }
+.ticket .pt { font-family: var(--font-mono); color: var(--muted); font-size: .95rem; white-space: nowrap; }
+.row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 2px solid var(--ink); background: var(--surface); border-radius: 99px; padding: 8px 14px; font-weight: 600; min-height: 44px; }
+.chip.num { font-family: var(--font-mono); }
+.chip:hover { background: var(--bg); }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.tw table { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tw th, .tw td { padding: 7px 12px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tw th { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); font-weight: 500; }
+.tw tr:last-child td { border-bottom: 0; }
+#res { transition: opacity .4s ease; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--surface); }
+.slide { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+.slide input { width: 100%; accent-color: var(--accent); min-height: 28px; }
+.tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.toolbtn { display: flex; align-items: center; gap: 10px; text-align: left; border: 2px solid var(--ink); background: var(--surface); border-radius: 8px; padding: 10px 12px; min-height: 66px; }
+.toolbtn:hover { background: var(--bg); }
+.toolbtn svg { width: 44px; height: 32px; flex: none; }
+.toolbtn b { display: block; font-family: var(--font-display); font-size: 1.05rem; }
+.toolbtn small { display: block; color: var(--muted); font-size: .78rem; line-height: 1.3; }
+.toolbtn[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.toolbtn[aria-pressed="true"] small { color: var(--bg); opacity: .85; }
+.lsl { position: relative; height: 64px; margin: 4px 14px 0; touch-action: pan-y; cursor: pointer; }
+.lsl:focus-visible { outline: 3px solid var(--accent); outline-offset: 8px; border-radius: 8px; }
+.lsl-track { position: absolute; left: 0; right: 0; top: 18px; height: 4px; border-radius: 2px; background: var(--ink); }
+.lsl-tick { position: absolute; top: 12px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: .72rem; color: var(--muted); pointer-events: none; white-space: nowrap; }
+.lsl-tick i { width: 2px; height: 16px; background: var(--ink); opacity: .55; }
+.lsl-tick b { font-weight: 600; }
+.lsl-tick.key i { width: 3px; height: 24px; margin-top: -4px; background: var(--yes); opacity: 1; }
+.lsl-tick.key b { color: var(--yes); }
+.lsl-knob { position: absolute; top: 8px; width: 24px; height: 24px; margin-left: -12px; border-radius: 50%; background: var(--accent); border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--accent), 0 2px 6px rgba(0, 0, 0, .3); pointer-events: none; }
+@media (max-width: 520px) { .tools { grid-template-columns: 1fr; } .row3 { grid-template-columns: 1fr; } }
+.check { list-style: none; padding: 0; margin: 0; display: flex; gap: 8px; flex-wrap: wrap; }
+.check li { font-size: .85rem; padding: 4px 12px 4px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); }
+.check li::before { content: "\25CB"; margin-right: 6px; }
+.check li.done { border-color: var(--yes); color: var(--yes); background: var(--yes-bg); }
+.check li.done::before { content: "\2713"; }
+.calc summary { cursor: pointer; color: var(--muted); font-size: .9rem; padding: 4px 0; }
+.calc .chips { margin: 8px 0; }
+</style>
+
+<style>
+html.embed header,html.embed .wrap>div:nth-of-type(1),html.embed .fine:last-of-type{}
+html.embed header,html.embed .embed-hide{display:none}
+html.embed body{background:transparent}
+html.embed .wrap{padding-top:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="brandrow"><svg id="logo" viewBox="0 0 100 108" aria-hidden="true"></svg><span class="brand">Lernicus · Kurvendiskussion</span></span>
+    <span class="score" id="score" aria-live="polite"></span>
+  </header>
+  <div>
+    <h1 class="embed-hide">Spiegel und Zauberuhr</h1>
+    <p class="sub embed-hide">Im x-Club hängt eine Spiegelwand, und an der Tür tickt eine Zauberuhr. Teste jeden Graphen mit beiden Werkzeugen und entscheide dann: achsensymmetrisch zur y-Achse, punktsymmetrisch zum Ursprung oder keins von beiden.</p>
+  </div>
+  <ol class="levels" id="levels"></ol>
+  <div id="plaque"></div>
+  <div class="plot" id="plot"></div>
+  <main id="stage" class="wrap" style="gap:14px"></main>
+  <p class="fine embed-hide">Kein Zeitdruck. Nach einem Hinweis darfst du noch einmal entscheiden. <button class="linkbtn" id="restart">Neu starten</button></p>
+</div>
+
+<script>
+(function () {
+  var KEY = 'lernicus-symmetrie';
+  var fmt = function (n) { var r = Math.round(n * 1e6) / 1e6; return String(r).replace('.', ',').replace('-', '−'); };
+  var eq = function (u, v) { return Math.abs(u - v) < 1e-9; };
+  var PL = 30, PR = 530, PT = 20, PB = 280, OX = 280;
+
+  var LEVELS = [
+    { name: 'Erste Entdeckungen',
+      rule: 'Achsensymmetrie zur y-Achse heißt f(−x) = f(x): Das Spiegelbild deckt den Graphen. Punktsymmetrie zum Ursprung heißt f(−x) = −f(x): Nach einer halben Drehung deckt sich der Graph mit sich selbst. Gerade Exponenten wie x² und x⁴ führen zu Achsensymmetrie, ungerade wie x³ und x⁵ zu Punktsymmetrie.',
+      rounds: [
+        { tex: 'x<sup>2</sup>', f: function (x) { return x * x; }, xr: 3.5, yr: [-2, 11], sym: 'axis',
+          why: 'Es kommt nur ein gerader Exponent vor. Es gilt f(−x) = (−x)² = x² = f(x). Der Spiegel auf der y-Achse deckt den Graphen, die Uhr bei 180° nicht.' },
+        { tex: 'x<sup>3</sup>', f: function (x) { return x * x * x; }, xr: 2.5, yr: [-10, 10], sym: 'point',
+          why: 'Es kommt nur ein ungerader Exponent vor. Es gilt f(−x) = (−x)³ = −x³ = −f(x). Die Uhr bei 180° deckt den Graphen, der Spiegel nicht.' },
+        { tex: 'x<sup>4</sup> − 2x<sup>2</sup>', f: function (x) { return Math.pow(x, 4) - 2 * x * x; }, xr: 2.5, yr: [-2, 10], sym: 'axis',
+          why: 'Es kommen nur gerade Exponenten vor (4 und 2). Es gilt f(−x) = (−x)⁴ − 2(−x)² = x⁴ − 2x² = f(x).' },
+        { tex: 'x<sup>3</sup> − 3x', f: function (x) { return x * x * x - 3 * x; }, xr: 2.5, yr: [-9, 9], sym: 'point',
+          why: 'Es kommen nur ungerade Exponenten vor (3 und 1). Es gilt f(−x) = −x³ + 3x = −(x³ − 3x) = −f(x).' }
+      ] },
+    { name: 'Knifflige Fälle',
+      rule: 'Eine Mischung aus geraden und ungeraden Exponenten zerstört beide Symmetrien. Ein Summand ohne x hat den Exponenten 0 und zählt als gerade. Er verträgt sich mit geraden Exponenten (Achsensymmetrie), aber nicht mit ungeraden.',
+      rounds: [
+        { tex: 'x<sup>2</sup> + x', f: function (x) { return x * x + x; }, xr: 3, yr: [-2, 10], sym: 'none', axes: [0, -0.5],
+          why: 'Hier ist x² gerade und x ungerade. Es gilt f(−x) = x² − x. Das ist weder f(x) noch −f(x). Der Spiegel deckt zwar bei x = −0,5, aber das ist nicht die y-Achse.' },
+        { tex: 'x<sup>3</sup> + 1', f: function (x) { return x * x * x + 1; }, xr: 2.5, yr: [-9, 11], sym: 'none',
+          why: 'x³ ist ungerade, die 1 hat den Exponenten 0 und ist gerade. Es gilt f(−x) = −x³ + 1. Das ist weder f(x) noch −f(x).' },
+        { tex: 'x<sup>4</sup> − 4x<sup>2</sup> + 1', f: function (x) { return Math.pow(x, 4) - 4 * x * x + 1; }, xr: 2.5, yr: [-5, 12], sym: 'axis',
+          why: 'x⁴ und x² sind gerade, und die 1 hat den Exponenten 0, ist also ebenfalls gerade. Es gilt f(−x) = f(x).' },
+        { tex: 'x<sup>5</sup> − 4x', f: function (x) { return Math.pow(x, 5) - 4 * x; }, xr: 2, yr: [-10, 10], sym: 'point',
+          why: 'Beide Exponenten (5 und 1) sind ungerade. Es gilt f(−x) = −x⁵ + 4x = −f(x).' }
+      ] },
+    { name: 'Fallen',
+      rule: 'Ein Graph kann zu einer anderen Geraden symmetrisch sein, zum Beispiel zu x = 1, und trotzdem nicht achsensymmetrisch zur y-Achse. Prüfe immer genau die y-Achse und den Ursprung. Eine Verschiebung nach oben oder unten erhält die Achsensymmetrie, zerstört aber die Punktsymmetrie.',
+      rounds: [
+        { tex: 'x<sup>2</sup> − 2x + 1', f: function (x) { return x * x - 2 * x + 1; }, xr: 3, yr: [-2, 10], sym: 'none', axes: [0, 1],
+          why: 'Das ist die Parabel (x − 1)², die um 1 nach rechts verschoben ist. Sie ist symmetrisch zur Geraden x = 1, aber nicht zur y-Achse. Es gilt f(−x) = x² + 2x + 1 ≠ f(x). Zum Ursprung ist sie auch nicht punktsymmetrisch.' },
+        { tex: 'x<sup>3</sup> + x<sup>2</sup>', f: function (x) { return x * x * x + x * x; }, xr: 2.5, yr: [-10, 14], sym: 'none',
+          why: 'x³ ist ungerade, x² ist gerade. Es gilt f(−x) = −x³ + x². Das ist weder f(x) noch −f(x).' },
+        { tex: 'x<sup>3</sup> + 2x', f: function (x) { return x * x * x + 2 * x; }, xr: 2.5, yr: [-20, 20], sym: 'point',
+          why: 'Beide Exponenten sind ungerade. Es gilt f(−x) = −x³ − 2x = −f(x).' },
+        { tex: 'x<sup>4</sup> − 3', f: function (x) { return Math.pow(x, 4) - 3; }, xr: 2.5, yr: [-4, 14], sym: 'axis',
+          why: 'x⁴ ist gerade, und die −3 hat den Exponenten 0, ist also ebenfalls gerade. Es gilt f(−x) = x⁴ − 3 = f(x).' }
+      ] }
+  ];
+  var SYMNAME = { axis: 'Achsensymmetrisch', point: 'Punktsymmetrisch', none: 'Weder noch' };
+  var maxScore = 0;
+  LEVELS.forEach(function (L) { maxScore += L.rounds.length * 20; });
+
+  var best = 0;
+  try { best = parseInt(localStorage.getItem(KEY), 10) || 0; } catch (e) {}
+  var stage = document.getElementById('stage'), plaqueEl = document.getElementById('plaque'), plotEl = document.getElementById('plot');
+  var s;
+
+  /* ---------- Logo ---------- */
+  function logoSvg() {
+    var n = '#1f3a5f';
+    return '<g fill="' + n + '"><polygon points="16,24 50,11 84,24 50,37"/><path d="M31 29 v11 q19 9 38 0 v-11 l-19 8z"/>' +
+      '<path d="M82 25 v12" stroke="' + n + '" stroke-width="2" fill="none"/><circle cx="82" cy="39" r="2.4"/>' +
+      '<path d="M26 52 L29 36 L40 42 L60 42 L71 36 L74 52 q0 11 -24 11 q-24 0 -24 -11z"/><ellipse cx="50" cy="76" rx="26" ry="23"/></g>' +
+      '<circle cx="40" cy="49" r="10" fill="#fff"/><circle cx="60" cy="49" r="10" fill="#fff"/><circle cx="40" cy="49" r="5" fill="' + n + '"/><circle cx="60" cy="49" r="5" fill="' + n + '"/>' +
+      '<circle cx="40" cy="49" r="1.8" fill="#fff"/><circle cx="60" cy="49" r="1.8" fill="#fff"/><path d="M46 56 L50 63 L54 56z" fill="#fff"/>' +
+      '<path d="M50 62 C38 66 36 82 50 94 C64 82 62 66 50 62z" fill="none" stroke="#fff" stroke-width="2.2"/>' +
+      '<path d="M45 72q2.5 3 5 0M52 72q2.5 3 5 0M42 79q2.5 3 5 0M49 79q2.5 3 5 0M56 79q2.5 3 5 0M46 86q2.5 3 5 0M52 86q2.5 3 5 0" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+      '<g fill="' + n + '"><path d="M8 90 Q32 86 50 97 V103 Q30 93 8 96z"/><path d="M92 90 Q68 86 50 97 V103 Q70 93 92 96z"/><rect x="6" y="103" width="88" height="3" rx="1.5"/></g>';
+  }
+  document.getElementById('logo').innerHTML = '<rect width="100" height="108" rx="14" fill="#f6f8fb"/>' + logoSvg();
+
+  /* ---------- Geometrie und Zeichnen ---------- */
+  function R() { return LEVELS[s.li].rounds[s.ri]; }
+  function geo(r) {
+    var sx = (PR - PL) / 2 / r.xr, sy = (PB - PT) / (r.yr[1] - r.yr[0]);
+    return { X: function (x) { return OX + x * sx; }, Y: function (y) { return PT + (r.yr[1] - y) * sy; }, oy: PT + r.yr[1] * sy, sx: sx };
+  }
+  function curve(g, r, mode) {
+    var d = '', n = 240, i, x, y, px, py;
+    for (i = 0; i <= n; i++) {
+      x = -r.xr + 2 * r.xr * i / n; y = r.f(x); px = x; py = y;
+      if (mode === 'mir') { px = -x; } else if (mode === 'rot') { px = -x; py = -y; }
+      d += (i ? 'L' : 'M') + g.X(px).toFixed(1) + ' ' + g.Y(py).toFixed(1);
+    }
+    return d;
+  }
+  function curveMirror(g, r, mx) {
+    var d = '', n = 240, i, x;
+    for (i = 0; i <= n; i++) { x = -r.xr + 2 * r.xr * i / n; d += (i ? 'L' : 'M') + g.X(2 * mx - x).toFixed(1) + ' ' + g.Y(r.f(x)).toFixed(1); }
+    return d;
+  }
+  function curveHalf(g, r, left) {
+    var d = '', n = 120, i, x;
+    for (i = 0; i <= n; i++) { x = (left ? -r.xr : 0) + r.xr * i / n; d += (i ? 'L' : 'M') + g.X(x).toFixed(1) + ' ' + g.Y(r.f(x)).toFixed(1); }
+    return d;
+  }
+  function fits(r, mx) {
+    var x, u, v;
+    for (x = -r.xr; x <= r.xr + 1e-9; x += 0.1) { u = r.f(2 * mx - x); v = r.f(x); if (Math.abs(u - v) > 1e-6 * (1 + Math.abs(v))) return false; }
+    return true;
+  }
+  function step(range) { return range <= 8 ? 1 : range <= 16 ? 2 : 5; }
+
+  function plotSvg(o) {
+    var r = R(), g = geo(r), h = [], i, y, ys = step(r.yr[1] - r.yr[0]), xm = Math.floor(r.xr);
+    h.push('<svg viewBox="0 0 560 300" role="img" aria-label="Koordinatensystem mit dem Graphen der Funktion">');
+    h.push('<defs><clipPath id="clip"><rect x="' + PL + '" y="' + PT + '" width="' + (PR - PL) + '" height="' + (PB - PT) + '"/></clipPath>' +
+      '<linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e8ddff" stop-opacity=".2"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#e8ddff" stop-opacity=".2"/></linearGradient></defs>');
+    h.push('<rect x="8" y="8" width="544" height="284" rx="10" fill="#1d0f35"/>');
+    for (i = -xm; i <= xm; i++) h.push('<line x1="' + g.X(i).toFixed(1) + '" y1="' + PT + '" x2="' + g.X(i).toFixed(1) + '" y2="' + PB + '" stroke="#33205a"/>');
+    for (y = Math.ceil(r.yr[0] / ys) * ys; y <= r.yr[1]; y += ys) h.push('<line x1="' + PL + '" y1="' + g.Y(y).toFixed(1) + '" x2="' + PR + '" y2="' + g.Y(y).toFixed(1) + '" stroke="#33205a"/>');
+    h.push('<line x1="' + PL + '" y1="' + g.oy.toFixed(1) + '" x2="' + PR + '" y2="' + g.oy.toFixed(1) + '" stroke="#b9a8e6" stroke-width="1.6"/>');
+    h.push('<line x1="' + OX + '" y1="' + PT + '" x2="' + OX + '" y2="' + PB + '" stroke="#b9a8e6" stroke-width="1.6"/>');
+    var below = g.oy + 14 < PB;
+    for (i = -xm; i <= xm; i++) if (i) h.push('<text x="' + g.X(i).toFixed(1) + '" y="' + (below ? g.oy + 14 : g.oy - 6).toFixed(1) + '" text-anchor="middle" font-size="10" fill="#cbbcf0" font-family="IBM Plex Mono, monospace">' + fmt(i) + '</text>');
+    for (y = Math.ceil(r.yr[0] / ys) * ys; y <= r.yr[1]; y += ys) if (y) h.push('<text x="' + (OX - 7) + '" y="' + (g.Y(y) + 3.5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#cbbcf0" font-family="IBM Plex Mono, monospace">' + fmt(y) + '</text>');
+    h.push('<path d="' + curve(g, r, '') + '" fill="none" stroke="#ff6ab0" stroke-width="3.5" stroke-linejoin="round" clip-path="url(#clip)"/>');
+    if (o.mir) h.push('<path d="' + curve(g, r, 'mir') + '" fill="none" stroke="#46d3ff" stroke-width="2.4" stroke-dasharray="7 5" clip-path="url(#clip)"/>');
+    if (o.rot) h.push('<path d="' + curve(g, r, 'rot') + '" fill="none" stroke="#ffd24a" stroke-width="2.4" stroke-dasharray="7 5" clip-path="url(#clip)"/>');
+    if (o.tool === 'mirror') {
+      h.push('<path id="mpath" d="' + curveMirror(g, r, s.mx) + '" fill="none" stroke="#46d3ff" stroke-width="2.6" stroke-dasharray="7 5" clip-path="url(#clip)"/>');
+      h.push('<g id="mgrp" transform="translate(' + (g.X(s.mx) - OX).toFixed(1) + ' 0)"><rect x="' + (OX - 6) + '" y="' + PT + '" width="12" height="' + (PB - PT) + '" fill="url(#glass)" stroke="#e8ddff" stroke-opacity=".8"/>' +
+        '<path d="M' + (OX - 3) + ' ' + (PT + 60) + ' l6 -16 M' + (OX - 3) + ' ' + (PT + 130) + ' l6 -16" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/>' +
+        '<rect x="' + (OX - 22) + '" y="' + (PT + 2) + '" width="44" height="18" rx="9" fill="#46d3ff"/>' +
+        '<path d="M' + (OX - 11) + ' ' + (PT + 11) + ' h22 M' + (OX - 11) + ' ' + (PT + 11) + ' l5 -4 M' + (OX - 11) + ' ' + (PT + 11) + ' l5 4 M' + (OX + 11) + ' ' + (PT + 11) + ' l-5 -4 M' + (OX + 11) + ' ' + (PT + 11) + ' l-5 4" stroke="#12091f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>');
+    }
+    if (o.tool === 'clock') {
+      var oyS = g.oy.toFixed(1), tk = '', k2, an, r1;
+      for (k2 = 0; k2 < 12; k2++) {
+        an = k2 * Math.PI / 6; r1 = k2 % 3 ? 32 : 36;
+        tk += '<line x1="' + (OX + 28 * Math.cos(an)).toFixed(1) + '" y1="' + (g.oy + 28 * Math.sin(an)).toFixed(1) + '" x2="' + (OX + r1 * Math.cos(an)).toFixed(1) + '" y2="' + (g.oy + r1 * Math.sin(an)).toFixed(1) + '" stroke="#ffe9a8" stroke-opacity=".75" stroke-width="1.4"/>';
+      }
+      h.push('<g clip-path="url(#clip)"><path d="' + curveHalf(g, r, true) + '" fill="none" stroke="#46d3ff" stroke-opacity=".6" stroke-width="8" stroke-linecap="round"/></g>');
+      h.push('<circle cx="' + OX + '" cy="' + oyS + '" r="28" fill="none" stroke="#ffd24a" stroke-opacity=".6" stroke-width="1.5"/>' + tk);
+      h.push('<g clip-path="url(#clip)"><g id="foil" transform="rotate(' + s.th.toFixed(1) + ' ' + OX + ' ' + oyS + ')"><path d="' + curveHalf(g, r, false) + '" fill="none" stroke="#ffd24a" stroke-width="3.5" stroke-linecap="round"/>' +
+        '<circle cx="' + (OX + 28) + '" cy="' + oyS + '" r="7" fill="#ffd24a" stroke="#fff" stroke-width="2"/></g></g>');
+      h.push('<circle cx="' + OX + '" cy="' + oyS + '" r="5" fill="#ffd24a" stroke="#fff" stroke-width="2"/>');
+    }
+    h.push('<text x="22" y="34" font-size="10" letter-spacing="1.4" fill="#cbbcf0" font-family="IBM Plex Sans, sans-serif">FALL ' + (s.ri + 1) + ' VON ' + LEVELS[s.li].rounds.length + '</text>');
+    h.push('</svg>');
+    return h.join('');
+  }
+
+  /* ---------- Zustand ---------- */
+  function fresh() { return { li: 0, ri: 0, phase: 'work', tries: 0, score: 0, msg: null, ev: [], tool: '', mx: 1.5, th: 70, sm: false, sc: false, calc: false }; }
+  function setRound() { s.phase = 'work'; s.tries = 0; s.msg = null; s.ev = []; s.tool = ''; s.mx = 1.5; s.th = 70; s.sm = false; s.sc = false; s.calc = false; }
+  function fbHtml() { return s.msg ? '<div class="fb ' + (s.msg.k || '') + '" role="status">' + s.msg.t + '</div>' : ''; }
+
+  /* ---------- Werkzeuge ---------- */
+  function ready() { return s.sm && s.sc; }
+  function refreshGate() {
+    var a = document.getElementById('ck-m'), b = document.getElementById('ck-c'), gt = document.getElementById('gate'), bs = stage.querySelectorAll('[data-a=det]'), i;
+    if (a) a.className = s.sm ? 'done' : '';
+    if (b) b.className = s.sc ? 'done' : '';
+    for (i = 0; i < bs.length; i++) bs[i].disabled = !ready();
+    if (gt) gt.hidden = ready();
+  }
+  function status() {
+    var el = document.getElementById('istatus'); if (!el) return;
+    if (s.tool === 'mirror') {
+      var txt = 'Spiegel bei x = ' + fmt(Math.round(s.mx * 100) / 100) + (eq(s.mx, 0) ? ' (auf der y-Achse)' : '');
+      if (!eq(s.mx, 0) && fits(R(), s.mx)) txt += '. <b>Hier deckt sich das Bild auch.</b> Aber diese Achse liegt bei x = ' + fmt(s.mx) + ', nicht auf der y-Achse.';
+      el.innerHTML = txt;
+    } else el.textContent = 'Zeiger gedreht um ' + (Math.round(s.th) % 360) + '°' + (s.th === 180 ? ' (eingerastet: die Zeiger stehen sich genau gegenüber)' : '');
+  }
+  function setMirror(mx) {
+    var r = R(), g = geo(r), axes = r.axes || [0], i;
+    mx = Math.max(-r.xr, Math.min(r.xr, mx));
+    for (i = 0; i < axes.length; i++) if (Math.abs(mx - axes[i]) < 0.1) mx = axes[i];
+    s.mx = mx; if (eq(mx, 0)) s.sm = true;
+    var grp = document.getElementById('mgrp'), pth = document.getElementById('mpath');
+    if (grp) grp.setAttribute('transform', 'translate(' + (g.X(mx) - OX).toFixed(1) + ' 0)');
+    if (pth) pth.setAttribute('d', curveMirror(g, r, mx));
+    updSlider(); status(); refreshGate();
+  }
+  function setTheta(th) {
+    var g = geo(R());
+    th = ((th % 360) + 360) % 360;
+    if (Math.abs(th - 180) < 7) th = 180;
+    s.th = th; if (th === 180) s.sc = true;
+    var f = document.getElementById('foil'); if (f) f.setAttribute('transform', 'rotate(' + th.toFixed(1) + ' ' + OX + ' ' + g.oy.toFixed(1) + ')');
+    updSlider(); status(); refreshGate();
+  }
+  function sliderCfg() { var r = R(); return s.tool === 'mirror' ? { min: -r.xr, max: r.xr, val: s.mx } : { min: 0, max: 360, val: s.th }; }
+  function sliderHtml() {
+    var r = R(), c = sliderCfg(), i, tk = [], html = '';
+    if (s.tool === 'mirror') { for (i = -Math.floor(r.xr); i <= Math.floor(r.xr); i++) tk.push([i, i === 0 ? 'y-Achse' : fmt(i), i === 0]); }
+    else { [0, 90, 180, 270, 360].forEach(function (d) { tk.push([d, d + '°', d === 180]); }); }
+    tk.forEach(function (q) { html += '<span class="lsl-tick' + (q[2] ? ' key' : '') + '" style="left:' + ((q[0] - c.min) / (c.max - c.min) * 100).toFixed(2) + '%"><i></i><b>' + q[1] + '</b></span>'; });
+    return '<div class="lsl" id="lsl" role="slider" tabindex="0" aria-label="' + (s.tool === 'mirror' ? 'Spiegel verschieben' : 'Zeiger drehen') + '" aria-valuemin="' + c.min + '" aria-valuemax="' + c.max + '" aria-valuenow="' + c.val.toFixed(2) + '">' +
+      '<div class="lsl-track"></div>' + html + '<div class="lsl-knob" id="lknob" style="left:' + ((c.val - c.min) / (c.max - c.min) * 100).toFixed(2) + '%"></div></div>';
+  }
+  function updSlider() {
+    var c = sliderCfg(), k = document.getElementById('lknob'), l = document.getElementById('lsl');
+    if (!k || !l) return;
+    k.style.left = ((c.val - c.min) / (c.max - c.min) * 100).toFixed(2) + '%';
+    l.setAttribute('aria-valuenow', c.val.toFixed(2));
+  }
+  function applySlider(v) { if (s.tool === 'mirror') setMirror(v); else setTheta(v); }
+  var sdrag = false;
+  function sliderTo(e) {
+    var l = document.getElementById('lsl'); if (!l) return;
+    var b = l.getBoundingClientRect(), c = sliderCfg(), q = Math.max(0, Math.min(1, (e.clientX - b.left) / b.width));
+    applySlider(c.min + q * (c.max - c.min));
+  }
+  stage.addEventListener('pointerdown', function (e) {
+    var l = e.target.closest('#lsl'); if (!l) return;
+    sdrag = true; try { l.setPointerCapture(e.pointerId); } catch (x) {}
+    l.focus({ preventScroll: true }); sliderTo(e); e.preventDefault();
+  });
+  stage.addEventListener('pointermove', function (e) { if (sdrag) sliderTo(e); });
+  stage.addEventListener('pointerup', function () { sdrag = false; });
+  stage.addEventListener('pointercancel', function () { sdrag = false; });
+  stage.addEventListener('keydown', function (e) {
+    if (e.target.id !== 'lsl') return;
+    var c = sliderCfg(), st = s.tool === 'mirror' ? 0.25 : 10, v = c.val;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v += st;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v -= st;
+    else if (e.key === 'Home') v = c.min; else if (e.key === 'End') v = c.max; else return;
+    e.preventDefault(); applySlider(Math.max(c.min, Math.min(c.max, v)));
+  });
+  stage.addEventListener('toggle', function (e) { if (e.target.id === 'calc') s.calc = e.target.open; }, true);
+
+  var drag = null;
+  function svgPt(e) { var svg = plotEl.querySelector('svg'), b = svg.getBoundingClientRect(); return [(e.clientX - b.left) * 560 / b.width, (e.clientY - b.top) * 300 / b.height]; }
+  function moveDrag(e) {
+    var r = R(), g = geo(r), p = svgPt(e);
+    if (drag.k === 'mirror') setMirror((p[0] - OX) / g.sx);
+    else {
+      var a = Math.atan2(p[1] - g.oy, p[0] - OX), d = a - drag.prev;
+      if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI;
+      drag.prev = a; drag.raw += d * 180 / Math.PI; setTheta(drag.raw);
+    }
+  }
+  plotEl.addEventListener('pointerdown', function (e) {
+    if (s.phase !== 'work' || !s.tool) return;
+    var p = svgPt(e), g = geo(R());
+    drag = { k: s.tool, raw: s.th, prev: Math.atan2(p[1] - g.oy, p[0] - OX) };
+    try { plotEl.setPointerCapture(e.pointerId); } catch (x) {}
+    moveDrag(e); e.preventDefault();
+  });
+  plotEl.addEventListener('pointermove', function (e) { if (drag) moveDrag(e); });
+  plotEl.addEventListener('pointerup', function () { drag = null; });
+  plotEl.addEventListener('pointercancel', function () { drag = null; });
+
+  function toolboxHtml() {
+    var m = s.tool === 'mirror', c = s.tool === 'clock';
+    var h = '<div class="tools" role="group" aria-label="Werkzeug wählen">' +
+      '<button class="toolbtn" id="tool-mirror" data-a="tool" data-v="mirror" aria-pressed="' + m + '"><svg viewBox="0 0 40 28" aria-hidden="true"><rect x="17" y="2" width="6" height="24" rx="2" fill="#cfd8ff" stroke="currentColor" stroke-width="1.5"/><path d="M3 22 Q9 4 14 22" fill="none" stroke="#ff6ab0" stroke-width="2.5"/><path d="M37 22 Q31 4 26 22" fill="none" stroke="#46d3ff" stroke-width="2.5" stroke-dasharray="3 2"/></svg><span><b>Spiegel</b><small>Spiegelt den Graphen an einer senkrechten Linie.</small></span></button>' +
+      '<button class="toolbtn" id="tool-clock" data-a="tool" data-v="clock" aria-pressed="' + c + '"><svg viewBox="0 0 40 28" aria-hidden="true"><circle cx="20" cy="14" r="12" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M20 14 Q27 5 33 9" fill="none" stroke="#e0a800" stroke-width="2.6" stroke-linecap="round"/><path d="M20 14 Q13 23 7 19" fill="none" stroke="#1f9fd1" stroke-width="2.6" stroke-linecap="round"/></svg><span><b>Zauberuhr</b><small>Ihre Zeiger sind die beiden Hälften des Graphen. Dreh sie.</small></span></button></div>';
+    if (s.tool) h += sliderHtml() + '<div class="fine" id="istatus"></div>';
+    else h += '<p class="fine">Wähle ein Werkzeug, um den Graphen zu testen.</p>';
+    return h;
+  }
+  function evidenceHtml() {
+    var r = R(), h = '<details class="calc" id="calc"' + (s.calc || s.ev.length ? ' open' : '') + '><summary>Zahlen nachrechnen (optional)</summary><div class="chips" role="group" aria-label="Zahl testen">' +
+      [1, 2, 3].map(function (n) { return '<button class="chip num" id="ev-' + n + '" data-a="ev" data-v="' + n + '" aria-pressed="' + (s.ev.indexOf(n) >= 0 ? 'true' : 'false') + '">x = ' + n + '</button>'; }).join('') + '</div>';
+    if (s.ev.length) {
+      h += '<div class="tw"><table><thead><tr><th>x</th><th>f(x)</th><th>f(−x)</th><th>−f(x)</th></tr></thead><tbody>' +
+        s.ev.map(function (n) { return '<tr><td>' + fmt(n) + '</td><td>' + fmt(r.f(n)) + '</td><td>' + fmt(r.f(-n)) + '</td><td>' + fmt(-r.f(n)) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }
+    return h + '</details>';
+  }
+
+  function render() {
+    var L = LEVELS[s.li], r = R(), h = '', ended = s.phase === 'levelEnd' || s.phase === 'finish';
+    document.getElementById('score').innerHTML = 'Punkte <b>' + s.score + '</b> / ' + maxScore + (best ? ' · Bestwert ' + best : '');
+    document.getElementById('levels').innerHTML = LEVELS.map(function (l, i) {
+      var c = s.phase === 'finish' || i < s.li ? 'done' : i === s.li ? 'on' : '';
+      return '<li class="' + c + '">Level ' + (i + 1) + ' · ' + l.name + '</li>';
+    }).join('');
+    plaqueEl.innerHTML = ended ? '' : '<div class="plaque"><small>Der Fall</small><div class="formula">f(x) = ' + r.tex + '</div></div>';
+    plotEl.hidden = ended;
+    if (!ended) plotEl.innerHTML = plotSvg({ tool: s.phase === 'work' ? s.tool : '', mir: s.phase === 'roundEnd' && r.sym === 'axis', rot: s.phase === 'roundEnd' && r.sym === 'point' });
+    plotEl.style.touchAction = s.phase === 'work' && s.tool === 'clock' ? 'none' : s.phase === 'work' && s.tool === 'mirror' ? 'pan-y' : '';
+    plotEl.style.cursor = s.phase === 'work' && s.tool ? (s.tool === 'mirror' ? 'ew-resize' : 'grab') : '';
+
+    if (s.phase === 'finish') {
+      h = '<div class="rule"><h2>Der Club kennt jetzt alle Symmetrien.</h2><p>Du hast <b>' + s.score + ' von ' + maxScore + ' Punkten</b> geholt.</p>' +
+        '<p class="fine">Achsensymmetrie bedeutet f(−x) = f(x), Punktsymmetrie bedeutet f(−x) = −f(x). Gemischte Exponenten zerstören beide, und eine andere Spiegelachse als die y-Achse zählt nicht. Als Nächstes passt die Nullstellenberechnung gut dazu.</p>' +
+        '<button class="btn go" id="again" data-a="restart">Noch einmal spielen</button></div>';
+    } else if (s.phase === 'levelEnd') {
+      h = '<div class="rule"><h2>Level ' + (s.li + 1) + ' geschafft: ' + L.name + '</h2><p><b>Regel, die du entdeckt hast:</b></p><p>' + L.rule + '</p>' +
+        '<button class="btn go" id="lnext" data-a="lnext" data-focus>' + (s.li + 1 < LEVELS.length ? 'Weiter zu Level ' + (s.li + 2) : 'Fertig') + '</button></div>';
+    } else if (s.phase === 'roundEnd') {
+      h = '<div class="rule"><h2>Urteil: ' + SYMNAME[r.sym] + '</h2><p>' + r.why + '</p><button class="btn go" id="rnext" data-a="rnext" data-focus>' + (s.ri + 1 < L.rounds.length ? 'Nächster Fall' : 'Level abschließen') + '</button></div>';
+    } else {
+      h = '<p class="q">Teste den Graphen mit beiden Werkzeugen</p>' +
+        '<p class="fine">Der Spiegel rastet auf der y-Achse ein, die Zauberuhr bei 180°. Bewege den Punkt auf der Linie oder ziehe im Bild. Deckt das gespiegelte oder gedrehte Bild den Graphen?</p>' +
+        toolboxHtml() +
+        '<ul class="check"><li id="ck-m" class="' + (s.sm ? 'done' : '') + '">Spiegel auf der y-Achse getestet</li><li id="ck-c" class="' + (s.sc ? 'done' : '') + '">Zauberuhr auf 180° getestet</li></ul>' +
+        evidenceHtml() +
+        '<p class="q">Was stellst du fest?</p><div class="row3">' +
+        ['axis', 'point', 'none'].map(function (k) { return '<button class="btn" id="d-' + k + '" data-a="det" data-v="' + k + '"' + (ready() ? '' : ' disabled') + '>' + SYMNAME[k] + '</button>'; }).join('') + '</div>' +
+        '<p class="fine" id="gate"' + (ready() ? ' hidden' : '') + '>Das Urteil ist frei, sobald du beide Werkzeuge getestet hast.</p>' + fbHtml();
+    }
+    stage.innerHTML = h;
+    var f = stage.querySelector('[data-focus]');
+    if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
+    if (s.phase === 'work' && s.tool) status();
+  }
+
+  function finishIfDone() { try { if (s.score > best) { best = s.score; localStorage.setItem(KEY, String(best)); } } catch (e) {} }
+
+  stage.addEventListener('click', handle);
+  document.getElementById('restart').addEventListener('click', function () { s = fresh(); setRound(); render(); });
+  function handle(e) {
+    var b = e.target.closest('[data-a]'); if (!b) return;
+    var a = b.dataset.a, L = LEVELS[s.li], r = R();
+    if (a === 'restart') { s = fresh(); setRound(); render(); return; }
+    if (a === 'tool') { s.tool = s.tool === b.dataset.v ? '' : b.dataset.v; }
+    else if (a === 'ev') { var n = +b.dataset.v; if (s.ev.indexOf(n) < 0) s.ev.push(n); s.calc = true; }
+    else if (a === 'det') {
+      if (b.dataset.v === r.sym) { s.score += s.tries === 0 ? 20 : 10; s.phase = 'roundEnd'; s.msg = null; }
+      else {
+        s.tries++;
+        if (s.tries >= 2) { s.phase = 'roundEnd'; s.msg = null; }
+        else s.msg = { k: '', t: '<b>Hinweis:</b> Schau dir beide Bilder noch einmal an. Achsensymmetrie heißt: Der Spiegel auf der y-Achse deckt den Graphen. Punktsymmetrie heißt: Die Zeiger der Uhr decken sich bei 180°. Deckt keins von beiden, lautet die Antwort „weder noch“.' };
+      }
+    }
+    else if (a === 'rnext') { if (s.ri + 1 < L.rounds.length) { s.ri++; setRound(); } else { s.phase = 'levelEnd'; } }
+    else if (a === 'lnext') { if (s.li + 1 < LEVELS.length) { s.li++; s.ri = 0; setRound(); } else { s.phase = 'finish'; finishIfDone(); } }
+    render();
+  }
+
+  /* Einbettung in die Schatzkarte (iframe): meldet Fortschritt, Ende und Höhe an die Elternseite */
+  var EMBED = /[?&]embed=1/.test(location.search);
+  if (EMBED) document.documentElement.classList.add('embed');
+  function report() {
+    if (!EMBED || !window.parent || window.parent === window) return;
+    var total = 0, done = 0, i;
+    for (i = 0; i < LEVELS.length; i++) total += LEVELS[i].rounds.length;
+    if (s.phase === 'finish') done = total;
+    else { for (i = 0; i < s.li; i++) done += LEVELS[i].rounds.length; done += s.phase === 'levelEnd' ? LEVELS[s.li].rounds.length - s.ri : s.ri + (s.phase === 'roundEnd' ? 1 : 0); if (s.phase === 'levelEnd') done = Math.min(total, done); }
+    window.parent.postMessage({ lernicus: 'symmetrie', progress: [done, total], finished: s.phase === 'finish', coins: Math.round(s.score / 20), height: Math.ceil(document.documentElement.scrollHeight) }, '*');
+  }
+  var _render = render; render = function () { _render(); report(); };
+  if (window.ResizeObserver) new ResizeObserver(report).observe(document.body);
+
+  s = fresh(); setRound(); render();
+})();
+</script>
+
+</body>
+</html>

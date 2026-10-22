@@ -132,11 +132,11 @@ details.card[open] summary { margin-bottom: 4px; }
       example: '<p>Achsenschnittpunkte von <span class="formula-inline">f(x) = x² − 1</span>:</p><div class="worked">' +
         '<div><p>Nullstellen: <span class="eq">x² − 1 = 0 ⇔ x² = 1 ⇔ x = −1 oder x = 1</span>. Punkte: (−1 | 0) und (1 | 0).</p></div>' +
         '<div><p>y-Achse: <span class="eq">f(0) = 0² − 1 = −1</span>. Punkt: (0 | −1).</p></div></div>' },
-    { icon: '🪞', topic: 'Symmetrie', title: 'Die zerrissene Schatzkarte', unit: 'Karte', module: function () { return window.LernicusSymmetrie; },
-      goal: 'Achsensymmetrie zur y-Achse und Punktsymmetrie zum Ursprung grafisch untersuchen und rechnerisch prüfen.',
-      explain: '<ul><li>🪞 <b>Magischer Spiegel</b> (Achsensymmetrie zur y-Achse): Aus (x | y) wird (−x | y). Rechnerisch: <span class="formula-inline">f(−x) = f(x)</span>.</li>' +
-        '<li>🔄 <b>Drehschlüssel</b> (Punktsymmetrie zum Ursprung): Aus (x | y) wird (−x | −y), eine Drehung um 180°. Rechnerisch: <span class="formula-inline">f(−x) = −f(x)</span>.</li></ul>' +
-        '<p class="callout">Einzelne passende Punktpaare sind nur <b>Hinweise</b>. Erst die Rechnung mit −x zeigt, dass die Symmetrie für den <b>gesamten</b> Graphen gilt.</p>',
+    { icon: '🪞', topic: 'Symmetrie', title: 'Spiegel und Zauberuhr', unit: 'Runde', module: function () { return window.LernicusSymmetrie; },
+      goal: 'Achsensymmetrie zur y-Achse und Punktsymmetrie zum Ursprung mit Spiegel und Zauberuhr untersuchen, erkennen und rechnerisch begründen.',
+      explain: '<ul><li>🪞 <b>Spiegel</b> (Achsensymmetrie zur y-Achse): Aus (x | y) wird (−x | y). Rechnerisch: <span class="formula-inline">f(−x) = f(x)</span>.</li>' +
+        '<li>🔄 <b>Zauberuhr</b> (Punktsymmetrie zum Ursprung): Aus (x | y) wird (−x | −y), eine Drehung um 180°. Rechnerisch: <span class="formula-inline">f(−x) = −f(x)</span>.</li></ul>' +
+        '<p class="callout">Teste jeden Graphen mit beiden Werkzeugen und entscheide dann. Eine andere Spiegelachse als die y-Achse zählt nicht, und einzelne passende Punktpaare sind nur <b>Hinweise</b>.</p>',
       example: '<p>Prüfe <span class="formula-inline">f(x) = x⁴ − 2x²</span> auf Symmetrie.</p><div class="worked">' +
         '<div><p>−x einsetzen: <span class="eq">f(−x) = (−x)⁴ − 2·(−x)² = x⁴ − 2x²</span></p></div>' +
         '<div><p>Vergleichen: Das ist genau f(x). Also gilt <span class="eq">f(−x) = f(x)</span> für alle x.</p></div>' +
